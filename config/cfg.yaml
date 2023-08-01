@@ -44,7 +44,7 @@ rectangle_masking:
 
 optim:
   name: adamw
-  lr: 5.0
+  lr: 0.02
   # optimizer arguments
   betas: [0.9, 0.98]
   weight_decay: 1e-3
