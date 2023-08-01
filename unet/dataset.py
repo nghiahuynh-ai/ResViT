@@ -1,5 +1,6 @@
 import os
 import math
+from typing import Any
 import torch
 import numpy as np
 import PIL.Image as Image
@@ -69,4 +70,7 @@ class UNetReconstructDataset(Dataset):
         image = self.transform(np.array(image.convert('RGB')))
 
         return image
+    
+    def __call__(self):
+        return self.loader
     

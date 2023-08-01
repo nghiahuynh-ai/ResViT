@@ -4,21 +4,19 @@ from unet.masking import RectangleMasking
 from unet.enc_dec import build_enc_dec
 from unet.bottleneck import build_bottleneck
 from unet.dataset import UNetReconstructDataset
-from omegaconf import OmegaConf
+from omegaconf import DictConfig
 import lightning.pytorch as pl
 
 
 class UNet(pl.LightningModule):
-    def __init__(self, cfg_filepath: str):
+    def __init__(self, cfg: DictConfig):
         super(UNet, self).__init__()
-        
-        cfg = OmegaConf.load(cfg_filepath)
         
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
         
-        self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
-        self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
+        self.train_dataloader = UNetReconstructDataset(cfg.train_dataset)
+        self.validation_dataloader = UNetReconstructDataset(cfg.validation_dataset)
         
         self.masking = RectangleMasking(cfg.rectangle_masking)
         
@@ -42,8 +40,7 @@ class UNet(pl.LightningModule):
         loss = nn.functional.mse_loss(x_reconstructed, x)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        print(x_reconstructed)
-        print('loss: ', loss)
+
         return loss
     
     def validation_step(self, batch, batch_idx):

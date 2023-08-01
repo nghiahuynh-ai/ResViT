@@ -1,16 +1,19 @@
 import time
 import torch
-import numpy as np
-from torchsummary import summary
-from skimage import io, transform
-from unet.enc_dec import build_enc_dec
-from unet.bottleneck import build_bottleneck
-from omegaconf import DictConfig, OmegaConf, open_dict
-from unet.dataset import UNetReconstructDataset
+# import numpy as np
+# from torchsummary import summary
+# from skimage import io, transform
+# from unet.enc_dec import build_enc_dec
+# from unet.bottleneck import build_bottleneck
+from omegaconf import OmegaConf
+# from unet.dataset import UNetReconstructDataset
 
+# from unet.unet import UNet
 from unet.unet import UNet
 
-model = UNet('config/cfg.yaml')
+config = OmegaConf.load('config/cfg.yaml')
+
+model = UNet(config)
 x = torch.rand(1, 3, 1920, 1152)
 s = time.time()
 x = model(x)
