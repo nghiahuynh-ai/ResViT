@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from masking import RectangleMasking
-from enc_dec import build_enc_dec
-from bottleneck import build_bottleneck
+from unet.masking import RectangleMasking
+from unet.enc_dec import build_enc_dec
+from unet.bottleneck import build_bottleneck
 from unet.dataset import UNetReconstructDataset
 from omegaconf import OmegaConf
 
