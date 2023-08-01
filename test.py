@@ -3,10 +3,10 @@ import torch
 import numpy as np
 from torchsummary import summary
 from skimage import io, transform
-from model.enc_dec import build_enc_dec
-from model.bottleneck import build_bottleneck
+from unet.enc_dec import build_enc_dec
+from unet.bottleneck import build_bottleneck
 from omegaconf import DictConfig, OmegaConf, open_dict
-from model.dataset import UNetReconstructDataset
+from unet.dataset import UNetReconstructDataset
 
 
 config = OmegaConf.load('config/cfg.yaml')

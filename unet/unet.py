@@ -3,7 +3,7 @@ import torch.nn as nn
 from masking import RectangleMasking
 from enc_dec import build_enc_dec
 from bottleneck import build_bottleneck
-from model.dataset import UNetReconstructDataset
+from unet.dataset import UNetReconstructDataset
 from omegaconf import OmegaConf
 
 
