@@ -42,7 +42,8 @@ class UNet(pl.LightningModule):
         loss = nn.functional.mse_loss(x_reconstructed, x)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        
+        print(x_reconstructed)
+        print('loss: ', loss)
         return loss
     
     def validation_step(self, batch, batch_idx):
