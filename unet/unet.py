@@ -15,8 +15,8 @@ class UNet(pl.LightningModule):
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
         
-        self.train_dataloader = UNetReconstructDataset(cfg.train_dataset)
-        self.validation_dataloader = UNetReconstructDataset(cfg.validation_dataset)
+        self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
+        self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
         
         self.masking = RectangleMasking(cfg.rectangle_masking)
         

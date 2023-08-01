@@ -71,6 +71,3 @@ class UNetReconstructDataset(Dataset):
 
         return image
     
-    def __call__(self):
-        return self.loader
-    
