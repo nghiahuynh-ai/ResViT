@@ -2,3 +2,4 @@ omegaconf
 Pillow
 einops
 pytorch-lightning
+lightning

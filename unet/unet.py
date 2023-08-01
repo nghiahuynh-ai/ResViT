@@ -5,9 +5,10 @@ from unet.enc_dec import build_enc_dec
 from unet.bottleneck import build_bottleneck
 from unet.dataset import UNetReconstructDataset
 from omegaconf import OmegaConf
+import lightning.pytorch as pl
 
 
-class UNet(nn.Module):
+class UNet(pl.LightningModule):
     def __init__(self, cfg_filepath: str):
         super(UNet, self).__init__()
         
