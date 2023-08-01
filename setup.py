@@ -4,7 +4,7 @@ from setuptools import setup
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-with open('requirements.txt') as fin:
+with open(os.path.join(os.getcwd(), 'requirements.txt')) as fin:
     lines = fin.readlines()
     lines = [o.strip() for o in lines]
     lines = [o for o in lines if len(o) > 0]
