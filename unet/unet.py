@@ -31,7 +31,7 @@ class UNet(nn.Module):
     def forward(self, x):
         x = self.encoder(x)
         x = self.bottleneck(x)
-        x = self.decoder(x)        
+        x = self.decoder(x, self.encoder.layers_outs)        
         return x
     
     def training_step(self, batch, batch_idx):

@@ -8,31 +8,40 @@ from unet.bottleneck import build_bottleneck
 from omegaconf import DictConfig, OmegaConf, open_dict
 from unet.dataset import UNetReconstructDataset
 
+from unet.unet import UNet
 
-config = OmegaConf.load('config/cfg.yaml')
-
-enc, dec = build_enc_dec(config.enc_dec)
-bottleneck = build_bottleneck(config.bottleneck)
-
-print('==========================================================================================================================')
-print(enc)
-print('==========================================================================================================================')
-print(bottleneck)
-print('==========================================================================================================================')
-print(dec)
-
+model = UNet('config/cfg.yaml')
 x = torch.rand(1, 3, 1920, 1152)
-# x = torch.rand(4, 3, 2688, 1536)
-print(x.shape)
 s = time.time()
-x = enc(x)
-print(x.shape)
-x = bottleneck(x)
-print(x.shape)
-x = dec(x, enc.layers_outs)
+x = model(x)
 e = time.time()
-print(x.shape)
 print(e-s)
+
+
+# config = OmegaConf.load('config/cfg.yaml')
+
+# enc, dec = build_enc_dec(config.enc_dec)
+# bottleneck = build_bottleneck(config.bottleneck)
+
+# print('==========================================================================================================================')
+# print(enc)
+# print('==========================================================================================================================')
+# print(bottleneck)
+# print('==========================================================================================================================')
+# print(dec)
+
+# x = torch.rand(1, 3, 1920, 1152)
+# # x = torch.rand(4, 3, 2688, 1536)
+# print(x.shape)
+# s = time.time()
+# x = enc(x)
+# print(x.shape)
+# x = bottleneck(x)
+# print(x.shape)
+# x = dec(x, enc.layers_outs)
+# e = time.time()
+# print(x.shape)
+# print(e-s)
 
 
 # image = io.imread('examples/data/4e0df6a064e28dbcd4f3.jpg')
