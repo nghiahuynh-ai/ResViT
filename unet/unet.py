@@ -6,6 +6,7 @@ from unet.bottleneck import build_bottleneck
 from unet.dataset import UNetReconstructDataset
 from omegaconf import DictConfig
 import lightning.pytorch as pl
+from torchmetrics.image import StructuralSimilarityIndexMeasure
 
 
 class UNet(pl.LightningModule):
@@ -19,6 +20,8 @@ class UNet(pl.LightningModule):
         self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
         
         self.masking = RectangleMasking(cfg.rectangle_masking)
+        
+        self.ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
         
         self.optimizer = torch.optim.AdamW(
             params=self.parameters(),
@@ -50,7 +53,10 @@ class UNet(pl.LightningModule):
             x_reconstructed = self.forward(x_masked)
             loss = nn.functional.mse_loss(x_reconstructed, x)
         
+            ssim_score = self.ssim(x_reconstructed, x)
+        
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("ssim_score", ssim_score, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         
         return loss
     
