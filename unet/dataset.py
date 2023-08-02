@@ -56,8 +56,6 @@ class UNetReconstructDataset(Dataset):
         collate = UNetReconstructCollate(cfg.scaling_factor, cfg.patch_size)
         self.loader = DataLoader(
             self, 
-            batch_size=cfg.batch_size, 
-            shuffle=cfg.shuffle,
             batch_sampler=BatchSampler(SequentialSampler(self), batch_size=cfg.batch_size, drop_last=False),
             num_workers=cfg.num_workers,
             collate_fn=collate,
