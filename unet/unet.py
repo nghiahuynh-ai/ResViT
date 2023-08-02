@@ -37,9 +37,11 @@ class UNet(pl.LightningModule):
         return x
     
     def training_step(self, batch, batch_idx):
-        x, x_masked = batch, batch.detach().clone()
+        x, sample_size = batch
+        x_masked = x.detach().clone()
         x_masked = self.masking(x_masked)
         x_reconstructed = self.forward(x_masked)
+        x_reconstructed = self.post_process(x_reconstructed, sample_size)
         loss = nn.functional.mse_loss(x_reconstructed, x)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -48,8 +50,8 @@ class UNet(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         with torch.no_grad():
-            x, x_masked = batch, batch.detach().clone()
-            x_masked = self.masking(x_masked)
+            x, sample_size = batch
+            x_masked = x.detach().clone()
             x_reconstructed = self.forward(x_masked)
             loss = nn.functional.mse_loss(x_reconstructed, x)
         
@@ -63,3 +65,9 @@ class UNet(pl.LightningModule):
     def configure_optimizers(self):
         return self.optimizer
     
+    def post_process(self, x, size):
+        for i in range(x.shape[0]):
+            hi, wi = size[i, 0], size[i, 1]
+            x[i, :, hi:, wi:] = 0.0
+            
+        return x

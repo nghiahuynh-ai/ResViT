@@ -28,14 +28,16 @@ class UNetReconstructCollate:
         max_h = math.ceil(max_h / self.total_downsample_factor) * self.total_downsample_factor
         max_w = math.ceil(max_w / self.total_downsample_factor) * self.total_downsample_factor
         
-        samples = []
+        samples, sample_size = [], []
         for sample in batch:
             _, h, w = sample.shape
             pad = (0, max_w - w, 0, max_h - h)
             sample = F.pad(sample, pad, "constant", 0)
             samples.append(sample)
+            sample_size.append(torch.tensor([h, w], dtype=torch.LongTensor))
         samples = torch.stack(samples)
-        return samples
+        sample_size = torch.stack(sample_size)
+        return samples, sample_size
     
 
 class UNetReconstructDataset(Dataset):
