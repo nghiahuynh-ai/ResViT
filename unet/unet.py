@@ -53,6 +53,7 @@ class UNet(pl.LightningModule):
             x, sample_size = batch
             x_masked = x.detach().clone()
             x_reconstructed = self.forward(x_masked)
+            x_reconstructed = self.post_process(x_reconstructed, sample_size)
             loss = nn.functional.mse_loss(x_reconstructed, x)
         
             ssim_score = self.ssim(x_reconstructed, x)
@@ -69,5 +70,4 @@ class UNet(pl.LightningModule):
         for i in range(x.shape[0]):
             hi, wi = size[i, 0], size[i, 1]
             x[i, :, hi:, wi:] = 0.0
-            
         return x

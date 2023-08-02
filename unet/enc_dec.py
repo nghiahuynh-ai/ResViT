@@ -47,15 +47,15 @@ class Decoder(nn.Module):
             layers.append(layer)
             in_channels = in_channels // 2
         self.layers = nn.ModuleList(layers)
-        self.layers_outs = []
+        # self.layers_outs = []
     
     def forward(self, x, enc_outs):
         # x: (b, out_channels, h/2^n_stages, w/2^n_stages) -> (b, in_channels, h, w)
-        self.layers_outs.clear()
+        # self.layers_outs.clear()
         for layer in self.layers:
             x = x + enc_outs.pop(-1)
             x = layer(x)
-            self.layers_outs.append(x)
+            # self.layers_outs.append(x)
         return x
 
 
