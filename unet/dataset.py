@@ -7,7 +7,8 @@ import PIL.Image as Image
 from torch.nn import functional as F
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
-from omegaconf import DictConfig, OmegaConf, open_dict
+from omegaconf import DictConfig
+from torch.utils.data.sampler import BatchSampler, SequentialSampler
 
 
 class UNetReconstructCollate:
@@ -57,6 +58,7 @@ class UNetReconstructDataset(Dataset):
             self, 
             batch_size=cfg.batch_size, 
             shuffle=cfg.shuffle,
+            batch_sampler=BatchSampler(SequentialSampler(self), batch_size=cfg.batch_size, drop_last=False),
             num_workers=cfg.num_workers,
             collate_fn=collate,
         )
