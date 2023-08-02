@@ -52,6 +52,7 @@ class UNet(pl.LightningModule):
         with torch.no_grad():
             x, sample_size = batch
             x_masked = x.detach().clone()
+            x_masked = self.masking(x_masked)
             x_reconstructed = self.forward(x_masked)
             x_reconstructed = self.post_process(x_reconstructed, sample_size)
             loss = nn.functional.mse_loss(x_reconstructed, x)
