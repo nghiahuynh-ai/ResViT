@@ -69,5 +69,6 @@ class UNet(pl.LightningModule):
     def post_process(self, x, size):
         for i in range(x.shape[0]):
             hi, wi = size[i, 0], size[i, 1]
-            x[i, :, hi:, wi:] = 0.0
+            x[i, :, hi:, :] = 0.0
+            x[i, :, :, wi:] = 0.0
         return x
