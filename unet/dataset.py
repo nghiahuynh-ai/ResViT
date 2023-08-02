@@ -34,7 +34,7 @@ class UNetReconstructCollate:
             pad = (0, max_w - w, 0, max_h - h)
             sample = F.pad(sample, pad, "constant", 0)
             samples.append(sample)
-            sample_size.append(torch.tensor([h, w], dtype=torch.LongTensor))
+            sample_size.append(torch.tensor([h, w], dtype=torch.long))
         samples = torch.stack(samples)
         sample_size = torch.stack(sample_size)
         return samples, sample_size
