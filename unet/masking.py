@@ -27,3 +27,19 @@ class RectangleMasking(nn.Module):
                 x[idx, :, h_start : h_start + h_offet, w_start : w_start + w_offet] = self.mask_value
                 
         return x
+    
+    
+class PixelMasking(nn.Module):
+    
+    def __init__(self, cfg: DictConfig):
+        super(PixelMasking, self).__init__()
+        
+        self.mask_ratio = cfg.ratio
+        self.mask_value = cfg.mask_value
+        
+    @torch.no_grad()
+    def forward(self, x):
+        prob = -1.0 * torch.rand(x.shape) + 1.0
+        mask = prob > self.mask_ratio
+        x = x * mask.to(x.device)
+        return x

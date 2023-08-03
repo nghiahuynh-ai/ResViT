@@ -8,7 +8,7 @@ bottleneck:
   feat_in: 512
   feat_out: 512
   patch_size: 3
-  n_layers: 8
+  n_layers: 12
   d_model: 512
   n_heads: 8
   ff_expansion_factor: 4
@@ -21,9 +21,9 @@ train_dataset:
   batch_size: 4
   shuffle: true
   num_workers: 4
-  normalize:
-    mean: [0.485, 0.456, 0.406]
-    std: [0.229, 0.224, 0.225]
+  # normalize:
+  #   mean: [0.485, 0.456, 0.406]
+  #   std: [0.229, 0.224, 0.225]
 
 validation_dataset:
   root_dir: null
@@ -32,28 +32,33 @@ validation_dataset:
   batch_size: 4
   shuffle: true
   num_workers: 4
-  normalize:
-    mean: [0.485, 0.456, 0.406]
-    std: [0.229, 0.224, 0.225]
+  # normalize:
+  #   mean: [0.485, 0.456, 0.406]
+  #   std: [0.229, 0.224, 0.225]
 
-rectangle_masking:
-  num_mask: 20 # number of masks
-  height: 0.1 # compared to image's height
-  width: 0.1 # compared to image's width
-  mask_value: 0.0
+masking:
+  rectangle_masking:
+    num_mask: 0 # number of masks
+    height: 0.1 # compared to image's height
+    width: 0.1 # compared to image's width
+    mask_value: 0.0
+
+  pixel_masking:
+    ratio: 0.5
+    mask_value: 0.0
 
 optim:
   name: adamw
-  lr: 0.02
+  lr: 0.005
   # optimizer arguments
   betas: [0.9, 0.98]
   weight_decay: 1e-3
 
   # scheduler setup
-  sched:
-    name: NoamAnnealing
-    d_model: ${bottleneck.d_model}
-    # scheduler config override
-    warmup_steps: 10000
-    warmup_ratio: null
-    min_lr: 1e-6
+  # sched:
+  #   name: NoamAnnealing
+  #   d_model: ${bottleneck.d_model}
+  #   # scheduler config override
+  #   warmup_steps: 10000
+  #   warmup_ratio: null
+  #   min_lr: 1e-6

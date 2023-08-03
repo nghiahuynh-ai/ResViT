@@ -1,6 +1,6 @@
 import os
 import math
-from typing import Any
+import cv2
 import torch
 import numpy as np
 import PIL.Image as Image
@@ -48,7 +48,7 @@ class UNetReconstructDataset(Dataset):
         
         self.transform = transforms.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std)
+                # transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std)
             ])
             
         collate = UNetReconstructCollate(cfg.scaling_factor, cfg.patch_size)
@@ -68,7 +68,9 @@ class UNetReconstructDataset(Dataset):
             idx = idx.item()
         img_name = self.samples[idx]
         image = Image.open(os.path.join(self.root_dir, img_name))
-        image = self.transform(np.array(image.convert('RGB')))
+        image = np.array(image.convert('RGB'))
+        image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+        image = self.transform(image)
 
         return image
     

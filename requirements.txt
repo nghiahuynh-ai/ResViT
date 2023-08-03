@@ -3,3 +3,4 @@ Pillow
 einops
 pytorch-lightning
 lightning
+opencv-python
