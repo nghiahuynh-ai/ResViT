@@ -19,7 +19,7 @@ class UNet(pl.LightningModule):
         self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
         self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
         
-        if hasattr(cfg.masking, 'rectangle_masking') and cfg.masking.num_mask > 0:
+        if hasattr(cfg.masking, 'rectangle_masking') and cfg.masking.rectangle_masking.num_mask > 0:
             self.masking = RectangleMasking(cfg.masking.rectangle_masking)
             self.mask_value = cfg.masking.rectangle_masking.mask_value
         else:
