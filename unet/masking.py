@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import torch
 import torch.nn as nn
 from omegaconf import DictConfig
@@ -42,4 +43,18 @@ class PixelMasking(nn.Module):
         prob = -1.0 * torch.rand(x.shape) + 1.0
         mask = prob > self.mask_ratio
         x = x * mask.to(x.device)
+        return x
+    
+    
+class NoiseMasking(nn.Module):
+    
+    def __init__(self, cfg: DictConfig):
+        super(NoiseMasking, self).__init__()
+        self.mean = cfg.mean
+        self.std = cfg.std
+        
+    def forward(self, x):
+        noise = np.random.normal(self.mean, self.std, size=x.shape)
+        noise = torch.from_numpy(noise).type(torch.FloatTensor)
+        x = x + noise.to(x.device)
         return x

@@ -44,8 +44,12 @@ masking:
     mask_value: 0.0
 
   pixel_masking:
-    ratio: 0.5
+    ratio: 0.0
     mask_value: 0.0
+
+  noise_masking:
+    mean: 0.0
+    std: 0.1
 
 optim:
   name: adamw

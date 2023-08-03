@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from unet.masking import RectangleMasking, PixelMasking
+from unet.masking import RectangleMasking, PixelMasking, NoiseMasking
 from unet.enc_dec import build_enc_dec
 from unet.bottleneck import build_bottleneck
 from unet.dataset import UNetReconstructDataset
@@ -21,10 +21,10 @@ class UNet(pl.LightningModule):
         
         if hasattr(cfg.masking, 'rectangle_masking') and cfg.masking.rectangle_masking.num_mask > 0:
             self.masking = RectangleMasking(cfg.masking.rectangle_masking)
-            self.mask_value = cfg.masking.rectangle_masking.mask_value
-        else:
+        elif hasattr(cfg.masking, 'pixel_masking') and cfg.masking.pixel_masking.ratio > 0:
             self.masking = PixelMasking(cfg.masking.pixel_masking)
-            self.mask_value = cfg.masking.pixel_masking.mask_value
+        else:
+            self.masking = NoiseMasking(cfg.masking.noise_masking)
         
         self.ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
         
@@ -75,6 +75,6 @@ class UNet(pl.LightningModule):
     def post_process(self, x, size):
         for i in range(x.shape[0]):
             hi, wi = size[i, 0], size[i, 1]
-            x[i, :, hi:, :] = self.mask_value
-            x[i, :, :, wi:] = self.mask_value
+            x[i, :, hi:, :] = 0.0
+            x[i, :, :, wi:] = 0.0
         return x
