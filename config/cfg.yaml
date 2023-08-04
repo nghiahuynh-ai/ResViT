@@ -15,7 +15,7 @@ bottleneck:
   dropout: 0.1
 
 train_dataset:
-  root_dir: null
+  root_dir: 'examples/data'
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
@@ -26,7 +26,7 @@ train_dataset:
   #   std: [0.229, 0.224, 0.225]
 
 validation_dataset:
-  root_dir: null
+  root_dir: 'examples/data'
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4

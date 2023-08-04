@@ -73,6 +73,8 @@ class UNet(pl.LightningModule):
         return self.optimizer
     
     def post_process(self, x, size):
+        print(x.shape)
+        print(size)
         for i in range(x.shape[0]):
             hi, wi = size[i, 0], size[i, 1]
             x[i, :, hi:, :] = 0.0

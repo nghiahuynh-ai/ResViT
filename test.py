@@ -7,18 +7,18 @@ import torch
 # from unet.bottleneck import build_bottleneck
 from omegaconf import OmegaConf
 # from unet.dataset import UNetReconstructDataset
+from unet.unet import UNet
 
-# from unet.unet import UNet
-# from unet.unet import UNet
+config = OmegaConf.load('config/cfg.yaml')
 
-# config = OmegaConf.load('config/cfg.yaml')
-
-# model = UNet(config)
-# x = torch.rand(1, 3, 1920, 1152)
-# s = time.time()
-# x = model(x)
-# e = time.time()
-# print(e-s)
+model = UNet(config)
+x = torch.rand(1, 3, 1920, 1152)
+s = time.time()
+x = model(x)
+x = model.post_process(x, torch.tensor([[1920, 1152]]))
+e = time.time()
+# print(x)
+print(e-s)
 
 
 # config = OmegaConf.load('config/cfg.yaml')
@@ -62,9 +62,9 @@ from omegaconf import OmegaConf
 # for batch in datasetloader:
 #     print(batch.shape)
 
-import torch
+# import torch
 
-a = torch.ones(5, 5)
-a[3:, :] = 0.0
-a[:, 3:] = 0.0
-print(a)
+# a = torch.ones(5, 5)
+# a[3:, :] = 0.0
+# a[:, 3:] = 0.0
+# print(a)
