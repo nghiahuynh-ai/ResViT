@@ -63,7 +63,6 @@ class Bottleneck(nn.Module):
         
     def forward(self, x):
         # X: (b, c, h, w) -> (b, l, d) -> (b, c, h, w)
-        
         _, c, h, _ = x.shape
         
         x = rearrange(x, 'b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1=self.patch_size, p2=self.patch_size)

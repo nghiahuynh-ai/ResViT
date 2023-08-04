@@ -1,17 +1,17 @@
 import torch
 import torch.nn as nn
-from unet.masking import RectangleMasking, PixelMasking, NoiseMasking
-from unet.enc_dec import build_enc_dec
-from unet.bottleneck import build_bottleneck
-from unet.dataset import UNetReconstructDataset
+from resvit.masking import RectangleMasking, PixelMasking, NoiseMasking
+from resvit.enc_dec import build_enc_dec
+from resvit.bottleneck import build_bottleneck
+from resvit.dataset import UNetReconstructDataset
 from omegaconf import DictConfig
 import lightning.pytorch as pl
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 
 
-class UNet(pl.LightningModule):
+class ResViTSSL(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
-        super(UNet, self).__init__()
+        super(ResViTSSL, self).__init__()
         
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
@@ -50,22 +50,23 @@ class UNet(pl.LightningModule):
         loss = nn.functional.mse_loss(x_reconstructed, x)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
     
     def validation_step(self, batch, batch_idx):
-        with torch.no_grad():
-            x, sample_size = batch
-            x_masked = x.detach().clone()
-            x_masked = self.masking(x_masked)
-            x_reconstructed = self.forward(x_masked)
-            x_reconstructed = self.post_process(x_reconstructed, sample_size)
-            loss = nn.functional.mse_loss(x_reconstructed, x)
+        x, sample_size = batch
+        x_masked = x.detach().clone()
+        x_masked = self.masking(x_masked)
+        x_reconstructed = self.forward(x_masked)
+        x_reconstructed = self.post_process(x_reconstructed, sample_size)
+        loss = nn.functional.mse_loss(x_reconstructed, x)
         
-            ssim_score = self.ssim(x_reconstructed, x)
+        ssim_score = self.ssim(x_reconstructed, x)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("ssim_score", ssim_score, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("ssim_score", ssim_score, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         
         return loss
     

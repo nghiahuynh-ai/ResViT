@@ -16,6 +16,6 @@ setup(
     author = "Nghia Huynh",
     author_email = "huynhnguyenhieunghia1999@gmail.com",
     description = ("An package of Image Pretraining using U-Net architecture"),
-    packages=['unet'],
+    packages=['resvit'],
     long_description=read('README.md'),
 )

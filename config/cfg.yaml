@@ -21,9 +21,6 @@ train_dataset:
   batch_size: 4
   shuffle: true
   num_workers: 4
-  # normalize:
-  #   mean: [0.485, 0.456, 0.406]
-  #   std: [0.229, 0.224, 0.225]
 
 validation_dataset:
   root_dir: 'examples/data'
@@ -32,9 +29,6 @@ validation_dataset:
   batch_size: 4
   shuffle: true
   num_workers: 4
-  # normalize:
-  #   mean: [0.485, 0.456, 0.406]
-  #   std: [0.229, 0.224, 0.225]
 
 masking:
   rectangle_masking:
@@ -54,15 +48,5 @@ masking:
 optim:
   name: adamw
   lr: 0.005
-  # optimizer arguments
   betas: [0.9, 0.98]
   weight_decay: 1e-3
-
-  # scheduler setup
-  # sched:
-  #   name: NoamAnnealing
-  #   d_model: ${bottleneck.d_model}
-  #   # scheduler config override
-  #   warmup_steps: 10000
-  #   warmup_ratio: null
-  #   min_lr: 1e-6
