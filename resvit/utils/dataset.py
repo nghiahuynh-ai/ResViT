@@ -8,6 +8,7 @@ from torch.nn import functional as F
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 from omegaconf import DictConfig
+from resvit.utils.find_files import find_files_by_ext
 
 class UNetReconstructCollate:
     
@@ -44,12 +45,9 @@ class UNetReconstructDataset(Dataset):
     def __init__(self, cfg: DictConfig):
         
         self.root_dir = cfg.root_dir
-        self.samples = list(os.listdir(cfg.root_dir))
+        self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions)
         
-        self.transform = transforms.Compose([
-                transforms.ToTensor(),
-                # transforms.Normalize(mean=cfg.normalize.mean, std=cfg.normalize.std)
-            ])
+        self.transform = transforms.ToTensor(),
             
         collate = UNetReconstructCollate(cfg.scaling_factor, cfg.patch_size)
         self.loader = DataLoader(

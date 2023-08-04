@@ -16,6 +16,7 @@ bottleneck:
 
 train_dataset:
   root_dir: 'examples/data'
+  extensions: ['.jpg', '.png']
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
@@ -24,6 +25,7 @@ train_dataset:
 
 validation_dataset:
   root_dir: 'examples/data'
+  extensions: ['.jpg', '.png']
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
