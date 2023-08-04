@@ -3,7 +3,7 @@ import torch
 from omegaconf import OmegaConf
 from resvit.model.resvit_ssl import ResViTSSL
 
-# config = OmegaConf.load('examples/config/ssl.yaml')
+config = OmegaConf.load('examples/config/ssl.yaml')
 
 # model = ResViTSSL(config)
 # x = torch.rand(1, 3, 1920, 1152)
@@ -17,3 +17,10 @@ from resvit.model.resvit_ssl import ResViTSSL
 
 # files = find_files_by_ext('resvit', ['.py', '.pyc'])
 # print(files)
+
+from resvit.utils.dataset import UNetReconstructDataset
+
+train_dataset = UNetReconstructDataset(config.train_dataset)
+loader = train_dataset.loader
+for b in loader:
+    print(b)

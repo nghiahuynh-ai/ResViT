@@ -21,7 +21,7 @@ train_dataset:
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
   shuffle: true
-  num_workers: 4
+  num_workers: 0
 
 validation_dataset:
   root_dir: 'examples/data'

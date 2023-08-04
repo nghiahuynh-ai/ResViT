@@ -46,8 +46,7 @@ class UNetReconstructDataset(Dataset):
         
         self.root_dir = cfg.root_dir
         self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions)
-        
-        self.transform = transforms.ToTensor(),
+        self.transform = transforms.ToTensor()
             
         collate = UNetReconstructCollate(cfg.scaling_factor, cfg.patch_size)
         self.loader = DataLoader(
@@ -65,7 +64,7 @@ class UNetReconstructDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.item()
         img_name = self.samples[idx]
-        image = Image.open(os.path.join(self.root_dir, img_name))
+        image = Image.open(img_name)
         image = np.array(image.convert('RGB'))
         image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
         image = self.transform(image)
