@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
-from resvit.module.masking import RectangleMasking, PixelMasking, NoiseMasking
+from resvit.module.masking import NoiseMasking
 from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
-from resvit.utils.dataset import UNetReconstructDataset
+from resvit.utils.dataset import ResViTSSLDataset
 from torchmetrics.image import StructuralSimilarityIndexMeasure
 from omegaconf import DictConfig
 import lightning.pytorch as pl
@@ -13,18 +13,13 @@ class ResViTSSL(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
         super(ResViTSSL, self).__init__()
         
-        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
+        self.encoder, self.decoder, self.out = build_enc_dec(cfg.enc_dec, out_layer=True)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
         
-        self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
-        self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
+        self.train_dataset = ResViTSSLDataset(cfg.train_dataset)
+        self.validation_dataset = ResViTSSLDataset(cfg.validation_dataset)
         
-        if hasattr(cfg.masking, 'rectangle_masking') and cfg.masking.rectangle_masking.num_mask > 0:
-            self.masking = RectangleMasking(cfg.masking.rectangle_masking)
-        elif hasattr(cfg.masking, 'pixel_masking') and cfg.masking.pixel_masking.ratio > 0:
-            self.masking = PixelMasking(cfg.masking.pixel_masking)
-        else:
-            self.masking = NoiseMasking(cfg.masking.noise_masking)
+        self.masking = NoiseMasking(cfg.masking)
         
         self.ssim = StructuralSimilarityIndexMeasure(data_range=1.0)
         
@@ -38,7 +33,8 @@ class ResViTSSL(pl.LightningModule):
     def forward(self, x):
         x = self.encoder(x)
         x = self.bottleneck(x)
-        x = self.decoder(x, self.encoder.layers_outs)        
+        x = self.decoder(x, self.encoder.layers_outs)
+        x = self.out(x)
         return x
     
     def training_step(self, batch, batch_idx):

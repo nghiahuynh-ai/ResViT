@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-def build_enc_dec(enc_dec_cfg):
+def build_enc_dec(enc_dec_cfg, out_layer=False):
     n_stages = int(enc_dec_cfg.n_stages)
     n_resblocks = int(enc_dec_cfg.n_resblocks)
     in_channels = int(enc_dec_cfg.in_channels)
@@ -10,7 +10,16 @@ def build_enc_dec(enc_dec_cfg):
     encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels)
     decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)
     
-    return encoder, decoder
+    if out_layer:
+        out = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+        )
+    
+    return encoder, decoder, out
 
 
 class Encoder(nn.Module):

@@ -1,4 +1,3 @@
-import os
 import math
 import cv2
 import torch
@@ -10,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 from omegaconf import DictConfig
 from resvit.utils.find_files import find_files_by_ext
 
-class UNetReconstructCollate:
+class ResViTSSLCollate:
     
     def __init__(self, scaling_factor, patch_size):
         self.total_downsample_factor = 2**scaling_factor * patch_size
@@ -39,8 +38,17 @@ class UNetReconstructCollate:
         sample_size = torch.stack(sample_size)
         return samples, sample_size
     
+    
+class ResViTDetectorCollate:
+    
+    def __init__(self):
+        pass
+    
+    def __call__(self, batch):
+        pass
+    
 
-class UNetReconstructDataset(Dataset):
+class ResViTSSLDataset(Dataset):
 
     def __init__(self, cfg: DictConfig):
         
@@ -48,7 +56,7 @@ class UNetReconstructDataset(Dataset):
         self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions)
         self.transform = transforms.ToTensor()
             
-        collate = UNetReconstructCollate(cfg.scaling_factor, cfg.patch_size)
+        collate = ResViTSSLCollate(cfg.scaling_factor, cfg.patch_size)
         self.loader = DataLoader(
             self, 
             batch_size=cfg.batch_size, 
@@ -70,4 +78,16 @@ class UNetReconstructDataset(Dataset):
         image = self.transform(image)
 
         return image
+    
+
+class ResViTDetectorDataset(Dataset):
+    
+    def __init__(self, cfg):
+        pass
+    
+    def __len__(self):
+        pass
+    
+    def __getitem__(self, idx):
+        pass
     

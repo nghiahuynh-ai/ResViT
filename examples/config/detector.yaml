@@ -1,3 +1,5 @@
+pretrain: null # pretrained state dict path
+
 enc_dec:
   n_stages: 6
   n_resblocks: 1
@@ -33,8 +35,19 @@ validation_dataset:
   num_workers: 4
 
 masking:
-  mean: 0.0
-  std: 0.1
+  rectangle_masking:
+    num_mask: 0 # number of masks
+    height: 0.1 # compared to image's height
+    width: 0.1 # compared to image's width
+    mask_value: 0.0
+
+  pixel_masking:
+    ratio: 0.0
+    mask_value: 0.0
+
+  noise_masking:
+    mean: 0.0
+    std: 0.1
 
 optim:
   name: adamw
