@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
-from resvit.masking import RectangleMasking, PixelMasking, NoiseMasking
-from resvit.enc_dec import build_enc_dec
-from resvit.bottleneck import build_bottleneck
-from resvit.dataset import UNetReconstructDataset
+from resvit.module.masking import RectangleMasking, PixelMasking, NoiseMasking
+from resvit.module.enc_dec import build_enc_dec
+from resvit.module.bottleneck import build_bottleneck
+from resvit.utils.dataset import UNetReconstructDataset
+from torchmetrics.image import StructuralSimilarityIndexMeasure
 from omegaconf import DictConfig
 import lightning.pytorch as pl
-from torchmetrics.image import StructuralSimilarityIndexMeasure
 
 
 class ResViTSSL(pl.LightningModule):
