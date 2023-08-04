@@ -53,6 +53,7 @@ class ResViTSSLDataset(Dataset):
     def __init__(self, cfg: DictConfig):
         
         self.root_dir = cfg.root_dir
+        print(cfg.root_dir)
         self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions)
         self.transform = transforms.ToTensor()
             

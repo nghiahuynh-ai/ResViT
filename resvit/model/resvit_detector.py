@@ -23,11 +23,9 @@ class ResViTDetector(pl.LightningModule):
             nn.Conv2d(
                 in_channels=cfg.enc_dec.in_channels,
                 out_channels=cfg.enc_dec.in_channels,
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=cfg.enc_dec.in_channels,
-                out_channels=cfg.enc_dec.in_channels,
+                kernel_size=3,
+                stride=1,
+                padding=1,
             ),
             nn.Sigmoid()
         )
@@ -36,14 +34,18 @@ class ResViTDetector(pl.LightningModule):
             nn.Conv2d(
                 in_channels=cfg.enc_dec.in_channels,
                 out_channels=cfg.enc_dec.in_channels,
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=cfg.enc_dec.in_channels,
-                out_channels=cfg.enc_dec.in_channels,
+                kernel_size=3,
+                stride=1,
+                padding=1,
             ),
             nn.Sigmoid()
         )
+        
+        self.loss = {
+            'ls': nn.BCELoss(),
+            'lb': None,
+            'lt': None,
+        }
         
         self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
         self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
@@ -56,7 +58,12 @@ class ResViTDetector(pl.LightningModule):
             weight_decay=cfg.optim.weight_decay,
         )
         
-    def forward(self, x):    
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.bottleneck(x)
+        x = self.decoder(x, self.encoder.layers_outs)
+        prob = self.prob_producer(x)
+        thres = self.thres_producer(x)
         return x
     
     def training_step(self, batch, batch_idx):
