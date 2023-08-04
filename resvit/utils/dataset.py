@@ -53,8 +53,7 @@ class ResViTSSLDataset(Dataset):
     def __init__(self, cfg: DictConfig):
         
         self.root_dir = cfg.root_dir
-        print(self.root_dir)
-        self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions)
+        self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions, acc=[])
         self.transform = transforms.ToTensor()
             
         collate = ResViTSSLCollate(cfg.scaling_factor, cfg.patch_size)
