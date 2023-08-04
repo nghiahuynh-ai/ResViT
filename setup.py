@@ -11,7 +11,7 @@ with open('requirements.txt') as fin:
     req = [o for o in lines if not o.startswith('#') and not o.startswith('git+')]
 
 setup(
-    name = "unet",
+    name = "resvit",
     version = "0.1",
     author = "Nghia Huynh",
     author_email = "huynhnguyenhieunghia1999@gmail.com",
