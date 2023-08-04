@@ -12,9 +12,3 @@ from resvit.model.resvit_ssl import ResViTSSL
 # x = model.post_process(x, torch.tensor([[1920, 1152]]))
 # e = time.time()
 # print(e-s)
-
-a = torch.rand(5, 5)
-b = a.sigmoid()
-print(a)
-print('================================')
-print(b)

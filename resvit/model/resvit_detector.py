@@ -1,7 +1,6 @@
 import os
 import torch
 import torch.nn as nn
-from resvit.module.masking import RectangleMasking, PixelMasking, NoiseMasking
 from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import UNetReconstructDataset
@@ -13,18 +12,42 @@ class ResViTDetector(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
         super(ResViTDetector, self).__init__()
         
-        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
+        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
 
         if os.path.isfile(cfg.pretrain):
             pretrain = torch.load(cfg.pretrain, map_location=self.device)['state_dict']
-            self.load_state_dict(pretrain)
+            self.load_state_dict(pretrain, strict=False)
             
-        self.prob_producer = None
-        self.thres_producer = None
+        self.prob_producer = nn.Sequential(
+            nn.Conv2d(
+                in_channels=cfg.enc_dec.in_channels,
+                out_channels=cfg.enc_dec.in_channels,
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=cfg.enc_dec.in_channels,
+                out_channels=cfg.enc_dec.in_channels,
+            ),
+            nn.Sigmoid()
+        )
+        
+        self.thres_producer = nn.Sequential(
+            nn.Conv2d(
+                in_channels=cfg.enc_dec.in_channels,
+                out_channels=cfg.enc_dec.in_channels,
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=cfg.enc_dec.in_channels,
+                out_channels=cfg.enc_dec.in_channels,
+            ),
+            nn.Sigmoid()
+        )
         
         self.train_dataset = UNetReconstructDataset(cfg.train_dataset)
         self.validation_dataset = UNetReconstructDataset(cfg.validation_dataset)
+        self.test_dataset = UNetReconstructDataset(cfg.test_dataset)
         
         self.optimizer = torch.optim.AdamW(
             params=self.parameters(),
