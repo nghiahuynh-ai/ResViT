@@ -85,11 +85,11 @@ class ResViTDetector(pl.LightningModule):
     
     def training_step(self, batch, batch_idx):
         x, gt = batch
-        gt = gt.unsqueeze(1)
         
         x_pred = self.forward(x)
         
-        loss = self.loss['ls'](x_pred, gt) + self.loss['lb'](x_pred, gt)
+        loss = self.loss['ls'](x_pred, gt) 
+        # + self.loss['lb'](x_pred, gt.type(torch.int32))
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -98,7 +98,6 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
-        gt = gt.unsqueeze(1)
         
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt) + self.loss['lb'](x_pred, gt)

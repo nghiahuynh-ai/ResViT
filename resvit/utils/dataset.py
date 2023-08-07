@@ -74,7 +74,7 @@ class ResViTDetectorCollate:
         
         for idx in range(len(samples)):
             samples[idx] = self.transform(samples[idx])
-            groundtruths[idx] = torch.from_numpy(groundtruths[idx])
+            groundtruths[idx] = self.transform(groundtruths[idx])
             
             _, h, w = samples[idx].shape
             pad = (0, max_w - w, 0, max_h - h)
