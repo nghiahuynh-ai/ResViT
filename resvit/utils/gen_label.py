@@ -7,7 +7,7 @@ def gen_label(image, polygons):
         
     h, w, _ = image.shape
 
-    gt = np.zeros((h, w), dtype=np.float32)
+    gt = np.zeros((h, w), dtype=np.int32)
     cv2.fillPoly(gt, polygons, 1)
         
     return gt
