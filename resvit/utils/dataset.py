@@ -47,6 +47,7 @@ class ResViTDetectorCollate:
     
     def __init__(self, scaling_factor, patch_size):
         self.total_downsample_factor = 2**scaling_factor * patch_size
+        self.transform = transforms.ToTensor()
         
     def __call__(self, batch):
         
@@ -72,7 +73,7 @@ class ResViTDetectorCollate:
         max_w = math.ceil(max_w / self.total_downsample_factor) * self.total_downsample_factor
         
         for idx in range(len(samples)):
-            samples[idx] = torch.from_numpy(samples[idx])
+            samples[idx] = self.transform(samples[idx])
             groundtruths[idx] = torch.from_numpy(groundtruths[idx])
             
             _, h, w = samples[idx].shape
