@@ -7,7 +7,7 @@ from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
-# from torcheval.metrics.functional import binary_precision, binary_recall, binary_f1_score
+# from torch.ignite.handlers.param_scheduler.
 from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
 from omegaconf import DictConfig
 import lightning.pytorch as pl
@@ -73,7 +73,7 @@ class ResViTDetector(pl.LightningModule):
         self.validation_dataset = ResViTDetectorDataset(cfg.validation_dataset)
         self.test_dataset = ResViTDetectorDataset(cfg.test_dataset)
         
-        optimizer = torch.optim.AdamW(
+        self.optimizer = torch.optim.AdamW(
             params=self.parameters(),
             lr=cfg.optim.lr,
             betas=cfg.optim.betas,
@@ -81,7 +81,7 @@ class ResViTDetector(pl.LightningModule):
         )
         
         self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer,
+            self.optimizer,
             max_lr=cfg.optim.lr,
             steps_per_epoch=cfg.optim.steps_per_epoch,
             epochs=cfg.optim.epochs,
@@ -137,4 +137,9 @@ class ResViTDetector(pl.LightningModule):
         pass
     
     def configure_optimizers(self):
-        return self.scheduler
+        return {
+            "optimizer": self.optimizer,
+            "lr_scheduler": {
+                "scheduler": self.scheduler,
+            },
+        }
