@@ -83,8 +83,8 @@ class ResViTDetector(pl.LightningModule):
         self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer,
             max_lr=cfg.optim.lr,
-            steps_per_epoch=cfg.steps_per_epoch,
-            epochs=cfg.epochs,
+            steps_per_epoch=cfg.optim.steps_per_epoch,
+            epochs=cfg.optim.epochs,
             anneal_strategy='linear'
         )
         
