@@ -7,7 +7,8 @@ from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
-from torcheval.metrics.functional import binary_precision, binary_recall, binary_f1_score
+# from torcheval.metrics.functional import binary_precision, binary_recall, binary_f1_score
+from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
 from omegaconf import DictConfig
 import lightning.pytorch as pl
 
@@ -62,6 +63,12 @@ class ResViTDetector(pl.LightningModule):
             'lt': nn.L1Loss(),
         }
         
+        self.metric = {
+            'precision': BinaryPrecision(),
+            'recall': BinaryRecall(),
+            'f1': BinaryF1Score(),
+        }
+        
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)
         self.validation_dataset = ResViTDetectorDataset(cfg.validation_dataset)
         self.test_dataset = ResViTDetectorDataset(cfg.test_dataset)
@@ -103,9 +110,9 @@ class ResViTDetector(pl.LightningModule):
         loss = self.loss['ls'](x_pred, gt) 
         # + self.loss['lb'](x_pred, gt)
         x_pred = (x_pred > 0.5) * 1.0
-        precision = binary_precision(x_pred, gt)
-        recall = binary_recall(x_pred, gt)
-        f1 = binary_f1_score(x_pred, gt)
+        precision = self.metric['precision'](x_pred, gt)
+        recall = self.metric['recall'](x_pred, gt)
+        f1 = self.metric['f1'](x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
