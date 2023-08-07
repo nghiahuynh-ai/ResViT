@@ -7,7 +7,8 @@ from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
-from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
+# from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
+from torchmetrics import Precision, Recall, F1Score
 from omegaconf import DictConfig
 import lightning.pytorch as pl
 
@@ -63,9 +64,9 @@ class ResViTDetector(pl.LightningModule):
         }
         
         self.metric = {
-            'precision': BinaryPrecision(),
-            'recall': BinaryRecall(),
-            'f1': BinaryF1Score(),
+            'precision': Precision(num_classes=2),
+            'recall': Recall(num_classes=2),
+            'f1': F1Score(num_classes=2),
         }
         
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)

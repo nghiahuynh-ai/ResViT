@@ -14,10 +14,15 @@ from resvit.model.resvit_ssl import ResViTSSL
 # e = time.time()
 # print(e-s)
 
-from resvit.utils.gen_label import gen_label
+# from resvit.utils.gen_label import gen_label
 
-a = np.random.rand(5, 5, 1)
-polygons = [[[1,2],[1,4], [2,2], [2,4]], [[3,3],[3,4], [4,3], [4,4]]]
-b = gen_label(a, np.array(polygons))
+# a = np.random.rand(5, 5, 1)
+# polygons = [[[1,2],[1,4], [2,2], [2,4]], [[3,3],[3,4], [4,3], [4,4]]]
+# b = gen_label(a, np.array(polygons))
 
-print(b)
+# print(b)
+
+from torchmetrics.functional import precision
+
+preds  = torch.rand(1, 1, 5, 5)
+preds  = torch.rand(1, 1, 5, 5)
