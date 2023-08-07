@@ -18,8 +18,9 @@ def build_enc_dec(enc_dec_cfg, out_layer=False):
             stride=1,
             padding=1,
         )
-    
-    return encoder, decoder, out
+        return encoder, decoder, out
+    else:
+        return encoder, decoder
 
 
 class Encoder(nn.Module):

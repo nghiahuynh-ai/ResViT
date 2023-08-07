@@ -16,7 +16,7 @@ class ResViTDetector(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
         super(ResViTDetector, self).__init__()
         
-        self.encoder, self.decoder, _ = build_enc_dec(cfg.enc_dec, out_layer=False)
+        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
 
         if os.path.isfile(cfg.pretrain):
