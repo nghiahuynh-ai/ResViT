@@ -2,6 +2,7 @@ import os
 from typing import Any, Optional
 from lightning.pytorch.utilities.types import STEP_OUTPUT
 import torch
+import torchmetrics
 import torch.nn as nn
 from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
@@ -120,9 +121,12 @@ class ResViTDetector(pl.LightningModule):
         # + self.loss['lb'](x_pred, gt)
         x_pred = (x_pred > 0.5) * 1.0
         x_pred = x_pred.to(gt.device)
-        precision = self.metric['precision'](x_pred, gt)
-        recall = self.metric['recall'](x_pred, gt)
-        f1 = self.metric['f1'](x_pred, gt)
+        # precision = self.metric['precision'](x_pred, gt)
+        precision = torchmetrics.functional.precision(x_pred, gt, num_classes=2)
+        # recall = self.metric['recall'](x_pred, gt)
+        recall = torchmetrics.functional.recall(x_pred, gt, num_classes=2)
+        # f1 = self.metric['f1'](x_pred, gt)
+        f1 = torchmetrics.functional.f1_score(x_pred, gt, num_classes=2)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
