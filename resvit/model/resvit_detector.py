@@ -58,15 +58,15 @@ class ResViTDetector(pl.LightningModule):
         # )
         
         self.loss = {
-            'ls': nn.BCELoss(),
+            'ls': nn.BCELoss().to(self.device),
             'lb': DiceLoss(),
-            'lt': nn.L1Loss(),
+            'lt': nn.L1Loss().to(self.device),
         }
         
         self.metric = {
-            'precision': BinaryPrecision(),
-            'recall': BinaryRecall(),
-            'f1': BinaryF1Score(),
+            'precision': BinaryPrecision().to(self.device),
+            'recall': BinaryRecall().to(self.device),
+            'f1': BinaryF1Score().to(self.device),
         }
         
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)
