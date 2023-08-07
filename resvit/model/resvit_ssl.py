@@ -64,7 +64,7 @@ class ResViTSSL(pl.LightningModule):
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("ssim_score", ssim_score, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         
-        return loss
+        return x_reconstructed
     
     def configure_optimizers(self):
         return self.optimizer

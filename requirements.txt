@@ -2,5 +2,8 @@ omegaconf
 Pillow
 einops
 pytorch-lightning
+torcheval
 lightning
 opencv-python
+pyclipper
+shapely

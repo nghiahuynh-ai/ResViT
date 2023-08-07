@@ -1,4 +1,6 @@
+import json
 import math
+import os
 import cv2
 import torch
 import numpy as np
@@ -8,6 +10,8 @@ from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 from omegaconf import DictConfig
 from resvit.utils.find_files import find_files_by_ext
+from resvit.utils.gen_label import gen_label
+
 
 class ResViTSSLCollate:
     
@@ -41,11 +45,47 @@ class ResViTSSLCollate:
     
 class ResViTDetectorCollate:
     
-    def __init__(self):
-        pass
-    
+    def __init__(self, scaling_factor, patch_size):
+        self.total_downsample_factor = 2**scaling_factor * patch_size
+        self.transform = transforms.ToTensor()
+        
     def __call__(self, batch):
-        pass
+        
+        max_h, max_w = 0, 0
+        samples, groundtruths = [], []
+        
+        for sample, polygons in batch:
+            image = Image.open(sample)
+            image = np.array(image.convert('RGB'))
+            image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+            gt = gen_label(image, polygons)
+            
+            samples.append(image)
+            groundtruths.append(gt)
+            
+            h, w, _ = image.shape
+            if h > max_h:
+                max_h = h
+            if w > max_w:
+                max_w = w
+
+        max_h = math.ceil(max_h / self.total_downsample_factor) * self.total_downsample_factor
+        max_w = math.ceil(max_w / self.total_downsample_factor) * self.total_downsample_factor
+        
+        for idx in range(len(samples)):
+            samples[idx] = self.transform(samples[idx])
+            groundtruths[idx] = self.transform(groundtruths[idx])
+            
+            _, h, w = samples[idx].shape
+            pad = (0, max_w - w, 0, max_h - h)
+
+            samples[idx] = F.pad(samples[idx], pad, "constant", 0)
+            groundtruths[idx] = F.pad(groundtruths[idx], pad, "constant", 0)
+        
+        samples = torch.stack(samples)
+        groundtruths = torch.stack(groundtruths)
+        
+        return samples, groundtruths
     
 
 class ResViTSSLDataset(Dataset):
@@ -82,12 +122,32 @@ class ResViTSSLDataset(Dataset):
 
 class ResViTDetectorDataset(Dataset):
     
-    def __init__(self, cfg):
-        pass
-    
+    def __init__(self, cfg: DictConfig):
+        if not os.path.isfile(cfg.manifest_path):
+            raise FileNotFoundError
+        else:
+            samples = []
+            with open(cfg.manifest_path, 'r') as f:
+                for line in f:
+                    line = json.loads(line)
+                    if os.path.isfile(line['path']):
+                        samples.append((line['path'], line['box']))
+            self.samples = samples
+
+        collate = ResViTDetectorCollate(cfg.scaling_factor, cfg.patch_size)
+        self.loader = DataLoader(
+            self, 
+            batch_size=cfg.batch_size, 
+            shuffle=cfg.shuffle,
+            num_workers=cfg.num_workers,
+            collate_fn=collate,
+        )
+
     def __len__(self):
-        pass
-    
+        return len(self.samples)
+
     def __getitem__(self, idx):
-        pass
+        if torch.is_tensor(idx):
+            idx = idx.item()
+        return self.samples[idx]
     
