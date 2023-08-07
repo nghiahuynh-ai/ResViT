@@ -107,7 +107,7 @@ class ResViTDetector(pl.LightningModule):
         # + self.loss['lb'](x_pred, gt.type(torch.int32))
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.scheduler.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.scheduler.get_last_lr()[-1], on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
     
@@ -123,7 +123,7 @@ class ResViTDetector(pl.LightningModule):
         f1 = self.metric['f1'](x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.scheduler.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.scheduler.get_last_lr()[-1], on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=True, on_epoch=True, prog_bar=True, logger=True)
