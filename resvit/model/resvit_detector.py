@@ -57,15 +57,15 @@ class ResViTDetector(pl.LightningModule):
         # )
         
         self.loss = {
-            'ls': nn.BCELoss().to(self.device),
+            'ls': nn.BCELoss(),
             'lb': DiceLoss(),
-            'lt': nn.L1Loss().to(self.device),
+            'lt': nn.L1Loss(),
         }
         
         self.metric = {
-            'precision': BinaryPrecision().to(self.device),
-            'recall': BinaryRecall().to(self.device),
-            'f1': BinaryF1Score().to(self.device),
+            'precision': BinaryPrecision(),
+            'recall': BinaryRecall(),
+            'f1': BinaryF1Score(),
         }
         
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)
@@ -117,7 +117,8 @@ class ResViTDetector(pl.LightningModule):
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt) 
         # + self.loss['lb'](x_pred, gt)
-        x_pred = ((x_pred > 0.5) * 1.0).to(x.device)
+        x_pred = (x_pred > 0.5) * 1.0
+        x_pred = x_pred.to(gt.device)
         precision = self.metric['precision'](x_pred, gt)
         recall = self.metric['recall'](x_pred, gt)
         f1 = self.metric['f1'](x_pred, gt)
