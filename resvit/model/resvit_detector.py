@@ -64,9 +64,9 @@ class ResViTDetector(pl.LightningModule):
         }
         
         self.metric = {
-            'precision': Precision(num_classes=2),
-            'recall': Recall(num_classes=2),
-            'f1': F1Score(num_classes=2),
+            'precision': Precision(task='binary', num_classes=2),
+            'recall': Recall(task='binary', num_classes=2),
+            'f1': F1Score(task='binary', num_classes=2),
         }
         
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)
