@@ -73,11 +73,19 @@ class ResViTDetector(pl.LightningModule):
         self.validation_dataset = ResViTDetectorDataset(cfg.validation_dataset)
         self.test_dataset = ResViTDetectorDataset(cfg.test_dataset)
         
-        self.optimizer = torch.optim.AdamW(
+        optimizer = torch.optim.AdamW(
             params=self.parameters(),
             lr=cfg.optim.lr,
             betas=cfg.optim.betas,
             weight_decay=cfg.optim.weight_decay,
+        )
+        
+        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer,
+            max_lr=cfg.optim.lr,
+            steps_per_epoch=cfg.steps_per_epoch,
+            epochs=cfg.epochs,
+            anneal_strategy='linear'
         )
         
     def forward(self, x):
@@ -99,7 +107,7 @@ class ResViTDetector(pl.LightningModule):
         # + self.loss['lb'](x_pred, gt.type(torch.int32))
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.scheduler.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
 
         return loss
     
@@ -115,7 +123,7 @@ class ResViTDetector(pl.LightningModule):
         f1 = self.metric['f1'](x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.scheduler.get_last_lr(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -129,4 +137,4 @@ class ResViTDetector(pl.LightningModule):
         pass
     
     def configure_optimizers(self):
-        return self.optimizer
+        return self.scheduler
