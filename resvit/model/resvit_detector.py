@@ -112,12 +112,12 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
-        print(x.device, gt.device)
+        # print(x.device, gt.device)
         
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt) 
         # + self.loss['lb'](x_pred, gt)
-        x_pred = (x_pred > 0.5) * 1.0
+        x_pred = ((x_pred > 0.5) * 1.0).to(x.device)
         precision = self.metric['precision'](x_pred, gt)
         recall = self.metric['recall'](x_pred, gt)
         f1 = self.metric['f1'](x_pred, gt)
