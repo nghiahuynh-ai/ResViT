@@ -7,7 +7,6 @@ from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
-# from torch.ignite.handlers.param_scheduler.
 from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
 from omegaconf import DictConfig
 import lightning.pytorch as pl
@@ -113,6 +112,7 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
+        print(x.device, gt.device)
         
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt) 
