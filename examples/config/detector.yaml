@@ -17,8 +17,7 @@ bottleneck:
   dropout: 0.1
 
 train_dataset:
-  root_dir: 'examples/data'
-  extensions: ['.jpg', '.png']
+  manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
@@ -26,8 +25,7 @@ train_dataset:
   num_workers: 4
 
 validation_dataset:
-  root_dir: 'examples/data'
-  extensions: ['.jpg', '.png']
+  manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
@@ -35,28 +33,12 @@ validation_dataset:
   num_workers: 4
 
 test_dataset:
-  root_dir: 'examples/data'
-  extensions: ['.jpg', '.png']
+  manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
   batch_size: 4
   shuffle: true
   num_workers: 4
-
-masking:
-  rectangle_masking:
-    num_mask: 0 # number of masks
-    height: 0.1 # compared to image's height
-    width: 0.1 # compared to image's width
-    mask_value: 0.0
-
-  pixel_masking:
-    ratio: 0.0
-    mask_value: 0.0
-
-  noise_masking:
-    mean: 0.0
-    std: 0.1
 
 optim:
   name: adamw

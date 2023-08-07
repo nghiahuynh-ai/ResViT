@@ -58,7 +58,7 @@ class ResViTDetectorCollate:
             image = Image.open(sample)
             image = np.array(image.convert('RGB'))
             image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
-            gt = gen_label(image, polygons)
+            gt = gen_label(image, np.array(polygons))
             
             samples.append(image)
             groundtruths.append(gt)
@@ -81,7 +81,7 @@ class ResViTDetectorCollate:
 
             samples[idx] = F.pad(samples[idx], pad, "constant", 0)
             groundtruths[idx] = F.pad(groundtruths[idx], pad, "constant", 0)
-        
+
         samples = torch.stack(samples)
         groundtruths = torch.stack(groundtruths)
         

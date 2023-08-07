@@ -17,7 +17,7 @@ from resvit.model.resvit_ssl import ResViTSSL
 from resvit.utils.gen_label import gen_label
 
 a = np.random.rand(5, 5, 1)
-polygons = np.array([[[1,2],[1,4], [2,2], [2,4]], [[3,3],[3,4], [4,3], [4,4]]], dtype=np.int32)
-b = gen_label(a, polygons)
+polygons = [[[1,2],[1,4], [2,2], [2,4]], [[3,3],[3,4], [4,3], [4,4]]]
+b = gen_label(a, np.array(polygons))
 
 print(b)
