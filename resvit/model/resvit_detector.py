@@ -98,9 +98,10 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
-        
+        print(x.dtype, gt.dtype)
         x_pred = self.forward(x)
-        loss = self.loss['ls'](x_pred, gt) + self.loss['lb'](x_pred, gt)
+        loss = self.loss['ls'](x_pred, gt) 
+        # + self.loss['lb'](x_pred, gt)
         x_pred = (x_pred > 0.5) * 1.0
         precision = binary_precision(x_pred, gt)
         recall = binary_recall(x_pred, gt)
