@@ -85,6 +85,7 @@ class ResViTDetector(pl.LightningModule):
     
     def training_step(self, batch, batch_idx):
         x, gt = batch
+        gt = gt.unsqueeze(1)
         
         x_pred = self.forward(x)
         
@@ -97,6 +98,7 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
+        gt = gt.unsqueeze(1)
         
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt) + self.loss['lb'](x_pred, gt)
