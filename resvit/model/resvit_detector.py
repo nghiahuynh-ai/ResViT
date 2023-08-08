@@ -1,14 +1,13 @@
 import os
-from typing import Any, Optional
-from lightning.pytorch.utilities.types import STEP_OUTPUT
 import torch
 import torchmetrics
 import torch.nn as nn
+from typing import Any, Optional
 from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
-# from torchmetrics.classification import BinaryPrecision, BinaryRecall, BinaryF1Score
+from resvit.utils.scheduler import NoamScheduler
 from torchmetrics import Precision, Recall, F1Score
 from omegaconf import DictConfig
 import lightning.pytorch as pl
@@ -81,13 +80,19 @@ class ResViTDetector(pl.LightningModule):
             weight_decay=cfg.optim.weight_decay,
         )
         
-        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            self.optimizer, 
-            max_lr=cfg.optim.lr, 
-            steps_per_epoch=cfg.optim.steps_per_epoch, 
-            epochs=cfg.optim.epochs,
-            anneal_strategy='linear'
+        self.scheduler = NoamScheduler(
+            optimizer=self.optimizer,
+            model_size=cfg.bottleneck.d_model,
+            warmup_steps=cfg.optim.warmup_steps,
         )
+        
+        # self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        #     self.optimizer, 
+        #     max_lr=cfg.optim.lr, 
+        #     steps_per_epoch=cfg.optim.steps_per_epoch, 
+        #     epochs=cfg.optim.epochs,
+        #     anneal_strategy='linear'
+        # )
         
     def forward(self, x):
         x = self.encoder(x)
@@ -159,4 +164,3 @@ class ResViTDetector(pl.LightningModule):
                 "monitor": "val_loss",
             },
         }
-        # return [self.optimizer], [self.scheduler]
