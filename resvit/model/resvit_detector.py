@@ -83,6 +83,7 @@ class ResViTDetector(pl.LightningModule):
         
         self.scheduler = NoamScheduler(
             optimizer=self.optimizer,
+            factor=cfg.optim.factor,
             model_size=cfg.bottleneck.d_model,
             warmup_steps=cfg.optim.warmup_steps,
         )
