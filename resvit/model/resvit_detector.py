@@ -147,7 +147,6 @@ class ResViTDetector(pl.LightningModule):
                 "interval": "step",
                 "frequency": 1,
                 "monitor": "val_loss",
-                "monitor": 
             },
             
         }
