@@ -81,9 +81,12 @@ class ResViTDetector(pl.LightningModule):
             weight_decay=cfg.optim.weight_decay,
         )
         
-        self.scheduler = torch.optim.lr_scheduler.LinearLR(
-            self.optimizer,
-            total_iters=cfg.optim.warmup_steps
+        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            self.optimizer, 
+            max_lr=cfg.optim.lr, 
+            steps_per_epoch=cfg.optim.steps_per_epoch, 
+            epochs=cfg.optim.epochs,
+            anneal_strategy='linear'
         )
         
     def forward(self, x):
@@ -148,6 +151,5 @@ class ResViTDetector(pl.LightningModule):
                 "frequency": 1,
                 "monitor": "val_loss",
             },
-            
         }
         # return [self.optimizer], [self.scheduler]
