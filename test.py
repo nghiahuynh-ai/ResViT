@@ -23,7 +23,7 @@ from resvit.model.resvit_ssl import ResViTSSL
 
 # print(b)
 
-
-preds  = torch.rand(5)
-target = torch.tensor([1, 1, 0, 0, 1])
-dice = torchmetrics.functional.dice(preds, target)
+# from torchmetrics.functional import precision, recall
+# preds  = torch.rand(5)
+# target = torch.tensor([1, 1, 0, 0, 1])
+# p, r = precision(preds, target, task='binary', num_classes=2)

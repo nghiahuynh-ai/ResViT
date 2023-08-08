@@ -114,7 +114,8 @@ class ResViTDetector(pl.LightningModule):
         loss = self.loss['ls'](x_pred, gt)
         x_pred = ((x_pred > 0.5) * 1.0).to(gt.device)
         
-        precision, recall = metrics.precision_recall(x_pred, gt, task='binary', num_classes=2)
+        precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
+        recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = 2 * precision * recall / (precision + recall)
         dice = metrics.dice(x_pred, gt)
         
@@ -134,7 +135,8 @@ class ResViTDetector(pl.LightningModule):
         loss = self.loss['ls'](x_pred, gt)
         x_pred = ((x_pred > 0.5) * 1.0).to(gt.device)
         
-        precision, recall = metrics.precision_recall(x_pred, gt, task='binary', num_classes=2)
+        precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
+        recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = 2 * precision * recall / (precision + recall)
         dice = metrics.dice(x_pred, gt)
         
