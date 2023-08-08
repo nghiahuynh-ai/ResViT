@@ -127,7 +127,7 @@ class ResViTDetector(pl.LightningModule):
 
         return x_pred
     
-    def test_step(self, batch, batch_idx, dataloader_idx=0):
+    def test_step(self, batch, batch_idx):
         x, gt = batch
 
         x_pred = self.forward(x)
