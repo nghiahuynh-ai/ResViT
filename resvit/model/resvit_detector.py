@@ -117,15 +117,12 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
-        gt = gt.type(torch.LongTensor).to(self.device)
-        dice = metrics.dice(x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("dice", dice, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return x_pred
     
@@ -139,15 +136,12 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
-        gt = gt.type(torch.LongTensor).to(self.device)
-        dice = metrics.dice(x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("dice", dice, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return x_pred
     
