@@ -143,9 +143,10 @@ class ResViTDetector(pl.LightningModule):
         pass
     
     def configure_optimizers(self):
-        return {
-            "optimizer": self.optimizer,
-            "lr_scheduler": {
-                "scheduler": self.scheduler,
-            },
-        }
+        # return {
+        #     "optimizer": self.optimizer,
+        #     "lr_scheduler": {
+        #         "scheduler": self.scheduler,
+        #     },
+        # }
+        return self.optimizer
