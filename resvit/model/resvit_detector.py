@@ -9,6 +9,7 @@ from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
 from resvit.utils.scheduler import NoamScheduler
 from torchmetrics import Precision, Recall, F1Score
+import torchvision.transforms as T
 from omegaconf import DictConfig
 import lightning.pytorch as pl
 
@@ -151,9 +152,15 @@ class ResViTDetector(pl.LightningModule):
 
         return x_pred
     
-    def predict(self, batch, batch_idx, dataloader_idx=0):
-        pass
-    
+    def predict(self, image):
+        pred = self.forward(image)
+        pred = (pred > 0.5) * 1.0
+        pred = pred.to(image.device)
+        image = image * pred.unsqueeze(1)
+        transform = T.ToPILImage()
+        image = transform(image)
+        image.show()
+        
     def configure_optimizers(self):
         return {
             "optimizer": self.optimizer,
