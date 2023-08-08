@@ -116,7 +116,7 @@ class ResViTDetector(pl.LightningModule):
         
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
-        f1 = 2 * precision * recall / (precision + recall)
+        f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         gt = gt.type(torch.LongTensor).to(self.device)
         dice = metrics.dice(x_pred, gt)
         
@@ -138,7 +138,7 @@ class ResViTDetector(pl.LightningModule):
         
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
-        f1 = 2 * precision * recall / (precision + recall)
+        f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         gt = gt.type(torch.LongTensor).to(self.device)
         dice = metrics.dice(x_pred, gt)
         
