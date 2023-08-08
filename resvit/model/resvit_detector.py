@@ -103,7 +103,7 @@ class ResViTDetector(pl.LightningModule):
         loss = self.loss['ls'](x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
 
         return loss
     
@@ -119,7 +119,7 @@ class ResViTDetector(pl.LightningModule):
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -138,7 +138,7 @@ class ResViTDetector(pl.LightningModule):
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
