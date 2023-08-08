@@ -2,6 +2,7 @@ import time
 import numpy as np
 import torch
 from omegaconf import OmegaConf
+import torchmetrics
 from resvit.model.resvit_ssl import ResViTSSL
 
 # config = OmegaConf.load('examples/config/ssl.yaml')
@@ -21,3 +22,8 @@ from resvit.model.resvit_ssl import ResViTSSL
 # b = gen_label(a, np.array(polygons))
 
 # print(b)
+
+
+preds  = torch.rand(5)
+target = torch.tensor([1, 1, 0, 0, 1])
+dice = torchmetrics.functional.dice(preds, target)

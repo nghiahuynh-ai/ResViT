@@ -1,14 +1,12 @@
 import os
 import torch
-import torchmetrics
 import torch.nn as nn
-from typing import Any, Optional
 from resvit.module.enc_dec import build_enc_dec
 from resvit.module.bottleneck import build_bottleneck
 from resvit.utils.dataset import ResViTDetectorDataset
 from resvit.module.loss import BalanceBCELoss, DiceLoss
 from resvit.utils.scheduler import NoamScheduler
-from torchmetrics import Precision, Recall, F1Score
+import torchmetrics.functional as metrics
 import torchvision.transforms as T
 from omegaconf import DictConfig
 import lightning.pytorch as pl
@@ -64,12 +62,6 @@ class ResViTDetector(pl.LightningModule):
             'lt': nn.L1Loss(),
         }
         
-        self.metric = {
-            'precision': Precision(task='binary', num_classes=2),
-            'recall': Recall(task='binary', num_classes=2),
-            'f1': F1Score(task='binary', num_classes=2),
-        }
-        
         self.train_dataset = ResViTDetectorDataset(cfg.train_dataset)
         self.validation_dataset = ResViTDetectorDataset(cfg.validation_dataset)
         self.test_dataset = ResViTDetectorDataset(cfg.test_dataset)
@@ -120,17 +112,18 @@ class ResViTDetector(pl.LightningModule):
 
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt)
-        x_pred = (x_pred > 0.5) * 1.0
-        x_pred = x_pred.to(gt.device)
-        precision = torchmetrics.functional.precision(x_pred, gt, task='binary', num_classes=2)
-        recall = torchmetrics.functional.recall(x_pred, gt, task='binary', num_classes=2)
-        f1 = torchmetrics.functional.f1_score(x_pred, gt, task='binary', num_classes=2)
+        x_pred = ((x_pred > 0.5) * 1.0).to(gt.device)
+        
+        precision, recall = metrics.precision_recall(x_pred, gt, task='binary', num_classes=2)
+        f1 = 2 * precision * recall / (precision + recall)
+        dice = metrics.dice(x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("precision", precision, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("recall", recall, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("f1", f1, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("dice", dice, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return x_pred
     
@@ -139,17 +132,18 @@ class ResViTDetector(pl.LightningModule):
 
         x_pred = self.forward(x)
         loss = self.loss['ls'](x_pred, gt)
-        x_pred = (x_pred > 0.5) * 1.0
-        x_pred = x_pred.to(gt.device)
-        precision = torchmetrics.functional.precision(x_pred, gt, task='binary', num_classes=2)
-        recall = torchmetrics.functional.recall(x_pred, gt, task='binary', num_classes=2)
-        f1 = torchmetrics.functional.f1_score(x_pred, gt, task='binary', num_classes=2)
+        x_pred = ((x_pred > 0.5) * 1.0).to(gt.device)
+        
+        precision, recall = metrics.precision_recall(x_pred, gt, task='binary', num_classes=2)
+        f1 = 2 * precision * recall / (precision + recall)
+        dice = metrics.dice(x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("precision", precision, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("recall", recall, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("f1", f1, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log("dice", dice, on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         return x_pred
     
