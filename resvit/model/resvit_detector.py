@@ -117,7 +117,7 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = 2 * precision * recall / (precision + recall)
-        dice = metrics.dice(x_pred, gt.type(torch.LongTensor))
+        dice = metrics.dice(x_pred, gt.to(torch.LongTensor, gt.device))
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -138,7 +138,7 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = 2 * precision * recall / (precision + recall)
-        dice = metrics.dice(x_pred, gt.type(torch.LongTensor))
+        dice = metrics.dice(x_pred, gt.to(torch.LongTensor, gt.device))
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
