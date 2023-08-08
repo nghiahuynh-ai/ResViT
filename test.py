@@ -21,8 +21,3 @@ from resvit.model.resvit_ssl import ResViTSSL
 # b = gen_label(a, np.array(polygons))
 
 # print(b)
-
-from torchmetrics.functional import precision
-
-preds  = torch.rand(1, 1, 5, 5)
-preds  = torch.rand(1, 1, 5, 5)
