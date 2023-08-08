@@ -94,9 +94,6 @@ class ResViTDetector(pl.LightningModule):
         x = self.bottleneck(x)
         x = self.decoder(x, self.encoder.layers_outs)
         x = self.out(x)
-        # prob = self.prob_producer(x)
-        # thres = self.thres_producer(x)
-        # bit = 1 / (1 + torch.exp(-50 * (prob - thres)))
         return x
     
     def training_step(self, batch, batch_idx):
@@ -104,8 +101,7 @@ class ResViTDetector(pl.LightningModule):
         
         x_pred = self.forward(x)
         
-        loss = self.loss['ls'](x_pred, gt) 
-        # + self.loss['lb'](x_pred, gt.type(torch.int32))
+        loss = self.loss['ls'](x_pred, gt)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -114,18 +110,13 @@ class ResViTDetector(pl.LightningModule):
     
     def validation_step(self, batch, batch_idx):
         x, gt = batch
-        # print(x.device, gt.device)
-        
+
         x_pred = self.forward(x)
-        loss = self.loss['ls'](x_pred, gt) 
-        # + self.loss['lb'](x_pred, gt)
+        loss = self.loss['ls'](x_pred, gt)
         x_pred = (x_pred > 0.5) * 1.0
         x_pred = x_pred.to(gt.device)
-        # precision = self.metric['precision'](x_pred, gt)
         precision = torchmetrics.functional.precision(x_pred, gt, task='binary', num_classes=2)
-        # recall = self.metric['recall'](x_pred, gt)
         recall = torchmetrics.functional.recall(x_pred, gt, task='binary', num_classes=2)
-        # f1 = self.metric['f1'](x_pred, gt)
         f1 = torchmetrics.functional.f1_score(x_pred, gt, task='binary', num_classes=2)
         
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
@@ -137,7 +128,23 @@ class ResViTDetector(pl.LightningModule):
         return x_pred
     
     def test_step(self, batch, batch_idx, dataloader_idx=0):
-        pass
+        x, gt = batch
+
+        x_pred = self.forward(x)
+        loss = self.loss['ls'](x_pred, gt)
+        x_pred = (x_pred > 0.5) * 1.0
+        x_pred = x_pred.to(gt.device)
+        precision = torchmetrics.functional.precision(x_pred, gt, task='binary', num_classes=2)
+        recall = torchmetrics.functional.recall(x_pred, gt, task='binary', num_classes=2)
+        f1 = torchmetrics.functional.f1_score(x_pred, gt, task='binary', num_classes=2)
+        
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("precision", precision, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("recall", recall, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("f1", f1, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+
+        return x_pred
     
     def predict(self, batch, batch_idx, dataloader_idx=0):
         pass
