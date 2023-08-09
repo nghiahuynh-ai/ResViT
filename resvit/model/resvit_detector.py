@@ -142,6 +142,12 @@ class ResViTDetector(pl.LightningModule):
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        
+        transform = T.ToPILImage()
+        x1 = transform(x)
+        x1.show()
+        pred = transform(x_pred)
+        pred.show()
 
         return x_pred
     
