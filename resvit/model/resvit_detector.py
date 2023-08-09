@@ -146,8 +146,9 @@ class ResViTDetector(pl.LightningModule):
         transform = T.ToPILImage()
         x1 = transform(x.squeeze(0))
         x1.show()
-        pred = transform(x_pred)
+        pred = transform(x_pred.squeeze(0))
         pred.show()
+        raise
 
         return x_pred
     
