@@ -155,7 +155,7 @@ class ResViTDetector(pl.LightningModule):
             raise ValueError(f"{self} Arguments ``img`` and ``image_path`` are mutually exclusive")
         
         if is_path:
-            image = preprocess(image).to(self.device)
+            image = preprocess(image_path).to(self.device)
         
         pred = self.forward(image)
         pred = (pred > 0.5) * 1.0
