@@ -13,12 +13,20 @@ from resvit.utils.find_files import find_files_by_ext
 from resvit.utils.gen_label import gen_label
 
 
-def preprocess(img_path):
+def preprocess(img_path, scaling_factor, patch_size):
     image = Image.open(img_path)
     image = np.array(image.convert('RGB'))
     image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
     transform = transforms.ToTensor()
     image = transform(image)
+    
+    _, h, w = image.shape
+    total_downsample_factor = 2**scaling_factor * patch_size
+    max_h = math.ceil(h / total_downsample_factor) * total_downsample_factor
+    max_w = math.ceil(w / total_downsample_factor) * total_downsample_factor
+    pad = (0, max_w - w, 0, max_h - h)
+    image = F.pad(image, pad, "constant", 0)
+    
     return image
     
 
