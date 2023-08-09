@@ -18,6 +18,8 @@ class ResViTDetector(pl.LightningModule):
     def __init__(self, cfg: DictConfig):
         super(ResViTDetector, self).__init__()
         
+        self.cfg = cfg
+        
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
 
@@ -155,7 +157,11 @@ class ResViTDetector(pl.LightningModule):
             raise ValueError(f"{self} Arguments ``img`` and ``image_path`` are mutually exclusive")
         
         if is_path:
-            image = preprocess(image_path).to(self.device)
+            image = preprocess(
+                image_path, 
+                self.cfg.enc_dec.n_stages, 
+                self.cfg.bottleneck.patch_size
+            ).to(self.device)
             image = image.unsqueeze(0)
         
         pred = self.forward(image)
