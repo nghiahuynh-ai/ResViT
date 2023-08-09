@@ -13,6 +13,15 @@ from resvit.utils.find_files import find_files_by_ext
 from resvit.utils.gen_label import gen_label
 
 
+def preprocess(img_path):
+    image = Image.open(img_path)
+    image = np.array(image.convert('RGB'))
+    image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+    transform = transforms.ToTensor()
+    image = transform(image)
+    return image
+    
+
 class ResViTSSLCollate:
     
     def __init__(self, scaling_factor, patch_size):

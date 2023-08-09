@@ -1,4 +1,5 @@
 import os
+import cv2
 import torch
 import torch.nn as nn
 from resvit.module.enc_dec import build_enc_dec
@@ -10,6 +11,7 @@ import torchmetrics.functional as metrics
 import torchvision.transforms as T
 from omegaconf import DictConfig
 import lightning.pytorch as pl
+from resvit.utils.dataset import preprocess
 
 
 class ResViTDetector(pl.LightningModule):
@@ -142,24 +144,26 @@ class ResViTDetector(pl.LightningModule):
         self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        
-        # transform = T.ToPILImage()
-        # x1 = transform(x.squeeze(0))
-        # x1.save('img.png')
-        # pred = transform(x_pred.squeeze(0))
-        # pred.save('pred.png')
-        # raise
 
         return x_pred
     
-    def predict(self, image):
+    def predict(self, image=None, image_path=None):
+
+        is_array = image is not None
+        is_path = image_path is not None
+        if (is_array ^ is_path) is False:
+            raise ValueError(f"{self} Arguments ``img`` and ``image_path`` are mutually exclusive")
+        
+        if is_path:
+            image = preprocess(image).to(self.device)
+        
         pred = self.forward(image)
         pred = (pred > 0.5) * 1.0
         pred = pred.to(image.device)
         image = image * pred.unsqueeze(1)
         transform = T.ToPILImage()
         image = transform(image)
-        image.show()
+        image.save('result.png')
         
     def configure_optimizers(self):
         return {
