@@ -156,13 +156,14 @@ class ResViTDetector(pl.LightningModule):
         
         if is_path:
             image = preprocess(image_path).to(self.device)
+            image = image.unsqueeze(0)
         
         pred = self.forward(image)
         pred = (pred > 0.5) * 1.0
         pred = pred.to(image.device)
         image = image * pred.unsqueeze(1)
         transform = T.ToPILImage()
-        image = transform(image)
+        image = transform(image.squeeze(0))
         image.save('result.png')
         
     def configure_optimizers(self):
