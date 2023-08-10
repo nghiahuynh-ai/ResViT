@@ -28,14 +28,6 @@
 # target = torch.tensor([1, 1, 0, 0, 1])
 # p, r = precision(preds, target, task='binary', num_classes=2)
 
-import torch.nn as nn
-import torch
-
 # layer = nn.Upsample(scale_factor=1)
 # a = torch.rand(1, 3, 5, 5)
 # b = layer(a)
-
-a = [nn.ReLU()]
-b = nn.ModuleList(a)
-print(len(b))
-print(b[0])
