@@ -5,6 +5,7 @@ enc_dec:
   n_resblocks: 1
   init_channels: 3
   max_channels: 512
+  deform_stages: [2, 3, 4, 5]
 
 bottleneck:
   feat_in: 512

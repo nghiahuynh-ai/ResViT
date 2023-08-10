@@ -8,9 +8,13 @@ def build_enc_dec(enc_dec_cfg, out_layer=False):
     n_resblocks = int(enc_dec_cfg.n_resblocks)
     in_channels = int(enc_dec_cfg.init_channels)
     out_channels = int(enc_dec_cfg.max_channels)
+    deform_stages = enc_dec_cfg.deform_stages
+    rdeform_stages = []
+    for i in deform_stages:
+        rdeform_stages.append(n_stages - i - 1)
     
-    encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels)
-    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)
+    encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels, deform_stages)
+    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels, rdeform_stages)
     
     if out_layer:
         out = nn.Conv2d(
@@ -26,13 +30,14 @@ def build_enc_dec(enc_dec_cfg, out_layer=False):
 
 
 class Encoder(nn.Module):
-    def __init__(self, n_stages, n_resblocks, in_channels=3, out_channels=512):
+    def __init__(self, n_stages, n_resblocks, in_channels=3, out_channels=512, deform_stages=[]):
         super(Encoder, self).__init__()
         layers = []
         for ith in range(n_stages):
             if ith == 0:
                 out_channels = out_channels // 2**(n_stages - 1)
-            layer = EncoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels)
+            deform = True if ith in deform_stages else False
+            layer = EncoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels, deform=deform)
             in_channels = out_channels
             out_channels *= 2
             layers.append(layer)
@@ -49,13 +54,14 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3):
+    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3, deform_stages=[]):
         super(Decoder, self).__init__()
         OUT_CHANNELS = out_channels
         layers = []
         for ith in range(n_stages):
             out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
-            layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels) 
+            deform = True if ith in deform_stages else False
+            layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels, deform=deform) 
             layers.append(layer)
             in_channels = in_channels // 2
         self.layers = nn.ModuleList(layers)
@@ -70,7 +76,7 @@ class Decoder(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, n_resblocks, in_channels, out_channels, kernel_size=3, stride=2, padding=1):
+    def __init__(self, n_resblocks, in_channels, out_channels, kernel_size=3, stride=2, padding=1, deform=False):
         super(EncoderLayer, self).__init__()
         self.downsampling = nn.Sequential(
             nn.Conv2d(
@@ -84,7 +90,7 @@ class EncoderLayer(nn.Module):
         )
         resblocks = []
         for _ in range(n_resblocks):
-            resblocks.append(ResBlock(out_channels, out_channels))
+            resblocks.append(ResBlock(out_channels, out_channels, deform=deform))
         self.resblocks = nn.Sequential(*resblocks)
         
     def forward(self, x):
@@ -96,11 +102,11 @@ class EncoderLayer(nn.Module):
 
 class DecoderLayer(nn.Module):
     
-    def __init__(self, n_resblocks, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
+    def __init__(self, n_resblocks, in_channels, out_channels, kernel_size=4, stride=2, padding=1, deform=False):
         super(DecoderLayer, self).__init__()
         resblocks = []
         for _ in range(n_resblocks):
-            resblocks.append(ResBlock(in_channels, in_channels))
+            resblocks.append(ResBlock(in_channels, in_channels, deform=deform))
         self.resblocks = nn.Sequential(*resblocks)
         self.upsampling = nn.ConvTranspose2d(
             in_channels=in_channels,
@@ -118,32 +124,43 @@ class DecoderLayer(nn.Module):
 
 class ResBlock(nn.Module):
     
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, deform=False):
         super(ResBlock, self).__init__()
-        self.block = nn.Sequential(
-            nn.Conv2d(
-                in_channels=in_channels, 
-                out_channels=out_channels, 
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding
-            ),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-            DeformConv2d(
+
+        self.conv1 = nn.Conv2d(
+            in_channels=in_channels, 
+            out_channels=out_channels, 
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding
+        )
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        
+        if deform:
+            self.conv2 = DeformConv2d(
                 in_channels=out_channels,
                 out_channels=out_channels, 
                 kernel_size=kernel_size,
                 stride=1,
                 padding=1
-            ),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-        )
+            )
+        else:
+            self.conv2 = nn.Conv2d(
+                in_channels=out_channels,
+                out_channels=out_channels, 
+                kernel_size=kernel_size,
+                stride=1,
+                padding=1
+            )
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        
         
     def forward(self, x):
         # x: (b, c, h, w) -> (b, c, h, w)
-        return nn.functional.relu(x + self.block(x))
+        residual = x
+        x = nn.functional.relu(self.bn1(self.conv1(x)))
+        x = nn.functional.relu(self.bn2(self.conv2(x)) + residual)
+        return x
     
     
 class DeformConv2d(nn.Module):
