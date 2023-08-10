@@ -84,14 +84,6 @@ class ResViTDetector(pl.LightningModule):
             warmup_steps=cfg.optim.warmup_steps,
         )
         
-        # self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        #     self.optimizer, 
-        #     max_lr=cfg.optim.lr, 
-        #     steps_per_epoch=cfg.optim.steps_per_epoch, 
-        #     epochs=cfg.optim.epochs,
-        #     anneal_strategy='linear'
-        # )
-        
     def forward(self, x):
         x = self.encoder(x)
         x = self.bottleneck(x)
@@ -106,8 +98,17 @@ class ResViTDetector(pl.LightningModule):
         
         loss = self.loss['ls'](x_pred, gt)
         
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        
+        log_dict = {
+            "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
+            "lr": {
+                "value": self.optimizer.param_groups[0]['lr'], 
+                "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
+            }
+        }
+        self.logging(log_dict)
 
         return loss
     
@@ -122,11 +123,23 @@ class ResViTDetector(pl.LightningModule):
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
-        self.log("valid_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("valid_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        
+        log_dict = {
+            "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
+            "lr": {
+                "value": self.optimizer.param_groups[0]['lr'], 
+                "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
+            },
+            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+        }
+        self.logging(log_dict)
 
         return x_pred
     
@@ -141,11 +154,23 @@ class ResViTDetector(pl.LightningModule):
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
-        self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        
+        log_dict = {
+            "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
+            "lr": {
+                "value": self.optimizer.param_groups[0]['lr'], 
+                "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
+            },
+            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+        }
+        self.logging(log_dict)
 
         return x_pred
     
@@ -169,18 +194,26 @@ class ResViTDetector(pl.LightningModule):
         if out_dir is None:
             out_dir = os.getcwd()
         else:
-            if not os.path.isdir(dir_path):
+            if not os.path.isdir(out_dir):
                 raise NotADirectoryError("The given output directory does not exist!")
             
-        if is_path:
+        if image_path is not None:
             name = image_path.split('/')[-1].split('.')[0] + '_bitmap_result.png'
         else:
             name = datetime.now().strftime("%d-%m-%Y-%H-%M-%S") + '_bitmap_result.png'
             
         pred.save(os.path.join(out_dir, name))
         
-    def log(self, figures: dict):
-        pass
+    def logging(self, logs: dict):
+        for key in logs:
+            self.log(
+                key,
+                logs[key]['value'],
+                logs[key]['on_step'],
+                logs[key]['on_epoch'],
+                logs[key]['prog_bar'],
+                logs[key]['logger'],
+            )
         
     def configure_optimizers(self):
         return {
