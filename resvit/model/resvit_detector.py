@@ -92,9 +92,9 @@ class ResViTDetector(pl.LightningModule):
                 "value": self.optimizer.param_groups[0]['lr'], 
                 "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
             },
-            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "precision": {"value": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"value": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"value": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
         }
         self.logging(log_dict)
 
@@ -117,9 +117,9 @@ class ResViTDetector(pl.LightningModule):
                 "value": self.optimizer.param_groups[0]['lr'], 
                 "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
             },
-            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "precision": {"value": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"value": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"value": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
         }
         self.logging(log_dict)
 
