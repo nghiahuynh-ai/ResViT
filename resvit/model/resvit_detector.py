@@ -159,11 +159,11 @@ class ResViTDetector(pl.LightningModule):
         for key in logs:
             self.log(
                 key,
-                logs[key]['value'],
-                on_step=logs[key]['on_step'],
-                on_epoch=logs[key]['on_epoch'],
-                prog_bar=logs[key]['prog_bar'],
-                logger=logs[key]['logger'],
+                logs[key]["value"],
+                on_step=logs[key]["on_step"],
+                on_epoch=logs[key]["on_epoch"],
+                prog_bar=logs[key]["prog_bar"],
+                logger=logs[key]["logger"],
             )
         
     def configure_optimizers(self):
