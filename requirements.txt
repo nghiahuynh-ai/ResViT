@@ -7,3 +7,4 @@ lightning
 opencv-python
 pyclipper
 shapely
+Augmentor

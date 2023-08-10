@@ -5,12 +5,13 @@ import cv2
 import torch
 import numpy as np
 import PIL.Image as Image
-from torch.nn import functional as F
-from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
 from omegaconf import DictConfig
-from resvit.utils.find_files import find_files_by_ext
+from torchvision import transforms
+from torch.nn import functional as F
 from resvit.utils.gen_label import gen_label
+from torch.utils.data import Dataset, DataLoader
+from resvit.utils.find_files import find_files_by_ext
+from resvit.utils.augmentation import ImgAugTransform
 
 
 def preprocess(image=None, image_path=None, scaling_factor=6, patch_size=3):
@@ -76,6 +77,7 @@ class ResViTDetectorCollate:
     def __init__(self, scaling_factor, patch_size):
         self.total_downsample_factor = 2**scaling_factor * patch_size
         self.transform = transforms.ToTensor()
+        self.augmentor = ImgAugTransform()
         
     def __call__(self, batch):
         
@@ -86,6 +88,7 @@ class ResViTDetectorCollate:
             image = Image.open(sample)
             image = np.array(image.convert('RGB'))
             image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+            image = self.augmentor(image)
             gt = gen_label(image, np.array(polygons))
             
             samples.append(image)

@@ -21,6 +21,7 @@ train_dataset:
   manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
+  augment: true
   batch_size: 4
   shuffle: true
   num_workers: 4
