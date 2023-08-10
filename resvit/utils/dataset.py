@@ -13,21 +13,32 @@ from resvit.utils.find_files import find_files_by_ext
 from resvit.utils.gen_label import gen_label
 
 
-def preprocess(img_path, scaling_factor, patch_size):
-    image = Image.open(img_path)
-    image = np.array(image.convert('RGB'))
+def preprocess(image=None, image_path=None, scaling_factor=6, patch_size=3):
+    
+    is_array = image is not None
+    is_path = image_path is not None
+    if (is_array ^ is_path) is False:
+        raise ValueError("Arguments ``image`` and ``image_path`` must be mutually exclusive")
+    
+    if is_array:
+        assert isinstance(image, np.ndarray)
+        
+    if is_path:
+        image = Image.open(image_path)
+        image = np.array(image.convert('RGB'))
+        
     image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
     transform = transforms.ToTensor()
     image = transform(image)
     
-    _, h, w = image.shape
+    _, h, w = image.shape   
     total_downsample_factor = 2**scaling_factor * patch_size
     max_h = math.ceil(h / total_downsample_factor) * total_downsample_factor
     max_w = math.ceil(w / total_downsample_factor) * total_downsample_factor
     pad = (0, max_w - w, 0, max_h - h)
     image = F.pad(image, pad, "constant", 0)
     
-    return image
+    return image, h, w
     
 
 class ResViTSSLCollate:

@@ -27,3 +27,7 @@ from resvit.model.resvit_ssl import ResViTSSL
 # preds  = torch.rand(5)
 # target = torch.tensor([1, 1, 0, 0, 1])
 # p, r = precision(preds, target, task='binary', num_classes=2)
+
+a = {'a': 1, 'b': 2, 'c': 3}
+for k in a:
+    print(k, a[k])

@@ -1,5 +1,4 @@
 import os
-import cv2
 import torch
 import torch.nn as nn
 from resvit.module.enc_dec import build_enc_dec
@@ -12,6 +11,7 @@ import torchvision.transforms as T
 from omegaconf import DictConfig
 import lightning.pytorch as pl
 from resvit.utils.dataset import preprocess
+from datetime import datetime
 
 
 class ResViTDetector(pl.LightningModule):
@@ -149,27 +149,38 @@ class ResViTDetector(pl.LightningModule):
 
         return x_pred
     
-    def predict(self, image=None, image_path=None):
-
-        is_array = image is not None
-        is_path = image_path is not None
-        if (is_array ^ is_path) is False:
-            raise ValueError(f"{self} Arguments ``img`` and ``image_path`` are mutually exclusive")
+    def predict(self, image=None, image_path=None, out_dir=None):
         
-        if is_path:
-            image = preprocess(
-                image_path, 
-                self.cfg.enc_dec.n_stages, 
-                self.cfg.bottleneck.patch_size
-            ).to(self.device)
-            image = image.unsqueeze(0)
+        image, h, w = preprocess(
+            image=image,
+            image_path=image_path, 
+            scaling_factor=self.cfg.enc_dec.n_stages, 
+            patch_size=self.cfg.bottleneck.patch_size,
+        )
+        image = image.to(self.device)
         
-        pred = self.forward(image)
+        pred = self.forward(image.unsqueeze(0)).squeeze(0)
+        
+        pred = pred[:, :h, :w] # clip padding
         pred = (pred > 0.5) * 1.0
-        pred = pred.to(image.device)
         transform = T.ToPILImage()
-        pred = transform(pred.squeeze(0))
-        pred.save('result.png')
+        pred = transform(pred)
+        
+        if out_dir is None:
+            out_dir = os.getcwd()
+        else:
+            if not os.path.isdir(dir_path):
+                raise NotADirectoryError("The given output directory does not exist!")
+            
+        if is_path:
+            name = image_path.split('/')[-1].split('.')[0] + '_bitmap_result.png'
+        else:
+            name = datetime.now().strftime("%d-%m-%Y-%H-%M-%S") + '_bitmap_result.png'
+            
+        pred.save(os.path.join(out_dir, name))
+        
+    def log(self, figures: dict):
+        pass
         
     def configure_optimizers(self):
         return {
