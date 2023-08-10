@@ -4,8 +4,8 @@ import torch.nn as nn
 def build_enc_dec(enc_dec_cfg, out_layer=False):
     n_stages = int(enc_dec_cfg.n_stages)
     n_resblocks = int(enc_dec_cfg.n_resblocks)
-    in_channels = int(enc_dec_cfg.in_channels)
-    out_channels = int(enc_dec_cfg.out_channels)
+    in_channels = int(enc_dec_cfg.init_channels)
+    out_channels = int(enc_dec_cfg.max_channels)
     
     encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels)
     decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)

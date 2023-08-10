@@ -37,28 +37,6 @@ class ResViTDetector(pl.LightningModule):
             ),
             nn.Sigmoid()
         )
-           
-        # self.prob_producer = nn.Sequential(
-        #     nn.Conv2d(
-        #         in_channels=cfg.enc_dec.in_channels,
-        #         out_channels=cfg.enc_dec.in_channels,
-        #         kernel_size=3,
-        #         stride=1,
-        #         padding=1,
-        #     ),
-        #     nn.Sigmoid()
-        # )
-        
-        # self.thres_producer = nn.Sequential(
-        #     nn.Conv2d(
-        #         in_channels=cfg.enc_dec.in_channels,
-        #         out_channels=cfg.enc_dec.in_channels,
-        #         kernel_size=3,
-        #         stride=1,
-        #         padding=1,
-        #     ),
-        #     nn.Sigmoid()
-        # )
         
         self.loss = {
             'ls': nn.BCELoss(),
@@ -98,9 +76,6 @@ class ResViTDetector(pl.LightningModule):
         
         loss = self.loss['ls'](x_pred, gt)
         
-        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
             "lr": {
@@ -123,21 +98,15 @@ class ResViTDetector(pl.LightningModule):
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
-        # self.log("valid_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
             "lr": {
                 "value": self.optimizer.param_groups[0]['lr'], 
                 "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
             },
-            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "precision": {"value": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"value": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"value": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
         }
         self.logging(log_dict)
 
@@ -154,21 +123,15 @@ class ResViTDetector(pl.LightningModule):
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
         
-        # self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
             "lr": {
                 "value": self.optimizer.param_groups[0]['lr'], 
                 "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True
             },
-            "precision": {"precision": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "recall": {"recall": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
-            "f1": {"f1": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "precision": {"value": precision, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "recall": {"value": recall, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
+            "f1": {"value": f1, "on_step": False, "on_epoch": True, "prog_bar": True, "logger": True},
         }
         self.logging(log_dict)
 
