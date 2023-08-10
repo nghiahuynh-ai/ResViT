@@ -98,9 +98,6 @@ class ResViTDetector(pl.LightningModule):
         
         loss = self.loss['ls'](x_pred, gt)
         
-        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
             "lr": {
@@ -122,12 +119,6 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
-        
-        # self.log("valid_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
@@ -153,12 +144,6 @@ class ResViTDetector(pl.LightningModule):
         precision = metrics.precision(x_pred, gt, task='binary', num_classes=2)
         recall = metrics.recall(x_pred, gt, task='binary', num_classes=2)
         f1 = metrics.f1_score(x_pred, gt, task='binary', num_classes=2)
-        
-        # self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("lr", self.optimizer.param_groups[0]['lr'], on_step=True, on_epoch=False, prog_bar=True, logger=True)
-        # self.log("precision", precision, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("recall", recall, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log("f1", f1, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         
         log_dict = {
             "train_loss": {"value": loss, "on_step": True, "on_epoch": True, "prog_bar": True, "logger": True},
@@ -209,10 +194,10 @@ class ResViTDetector(pl.LightningModule):
             self.log(
                 key,
                 logs[key]['value'],
-                logs[key]['on_step'],
-                logs[key]['on_epoch'],
-                logs[key]['prog_bar'],
-                logs[key]['logger'],
+                on_step=logs[key]['on_step'],
+                on_epoch=logs[key]['on_epoch'],
+                prog_bar=logs[key]['prog_bar'],
+                logger=logs[key]['logger'],
             )
         
     def configure_optimizers(self):
