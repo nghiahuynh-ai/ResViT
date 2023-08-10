@@ -20,45 +20,12 @@ class ResViTDetector(pl.LightningModule):
         
         self.cfg = cfg
         
-        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
+        self.encoder, self.decoder = build_enc_dec(cfg.enc_dec)
         self.bottleneck = build_bottleneck(cfg.bottleneck)
 
         if os.path.isfile(cfg.pretrain):
             pretrain = torch.load(cfg.pretrain, map_location=self.device)['state_dict']
             self.load_state_dict(pretrain, strict=False)
-        
-        self.out = nn.Sequential(
-            nn.Conv2d(
-                in_channels=cfg.enc_dec.in_channels,
-                out_channels=1,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-            ),
-            nn.Sigmoid()
-        )
-           
-        # self.prob_producer = nn.Sequential(
-        #     nn.Conv2d(
-        #         in_channels=cfg.enc_dec.in_channels,
-        #         out_channels=cfg.enc_dec.in_channels,
-        #         kernel_size=3,
-        #         stride=1,
-        #         padding=1,
-        #     ),
-        #     nn.Sigmoid()
-        # )
-        
-        # self.thres_producer = nn.Sequential(
-        #     nn.Conv2d(
-        #         in_channels=cfg.enc_dec.in_channels,
-        #         out_channels=cfg.enc_dec.in_channels,
-        #         kernel_size=3,
-        #         stride=1,
-        #         padding=1,
-        #     ),
-        #     nn.Sigmoid()
-        # )
         
         self.loss = {
             'ls': nn.BCELoss(),
@@ -88,7 +55,6 @@ class ResViTDetector(pl.LightningModule):
         x = self.encoder(x)
         x = self.bottleneck(x)
         x = self.decoder(x, self.encoder.layers_outs)
-        x = self.out(x)
         return x
     
     def training_step(self, batch, batch_idx):

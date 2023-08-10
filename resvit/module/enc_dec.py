@@ -1,26 +1,18 @@
+import torch
 import torch.nn as nn
 
 
-def build_enc_dec(enc_dec_cfg, out_layer=False):
+def build_enc_dec(enc_dec_cfg):
     n_stages = int(enc_dec_cfg.n_stages)
     n_resblocks = int(enc_dec_cfg.n_resblocks)
     in_channels = int(enc_dec_cfg.in_channels)
     out_channels = int(enc_dec_cfg.out_channels)
+    multiscale = enc_dec_cfg.multiscale
     
     encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels)
-    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)
+    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels, multiscale)
     
-    if out_layer:
-        out = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-        )
-        return encoder, decoder, out
-    else:
-        return encoder, decoder
+    return encoder, decoder
 
 
 class Encoder(nn.Module):
@@ -47,25 +39,72 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3):
+    
+    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3, multiscale=True):
         super(Decoder, self).__init__()
         OUT_CHANNELS = out_channels
         layers = []
+        multiscale_layers = []
+        
+        if multiscale:
+            multiscale_layers.append(
+                UpsampleLayer(
+                    scale_factor=2**n_stages,
+                    in_channels=in_channels,
+                    out_channels=OUT_CHANNELS,
+                )
+            )
+        
         for ith in range(n_stages):
-            out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
+            # out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
+            out_channels = in_channels // 2
             layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels) 
             layers.append(layer)
+            
+            if multiscale:
+                multiscale_layers.append(
+                    UpsampleLayer(
+                        scale_factor=2**(n_stages - ith -1),
+                        in_channels=out_channels, 
+                        out_channels=OUT_CHANNELS,
+                    )
+                )
+            
             in_channels = in_channels // 2
+            
         self.layers = nn.ModuleList(layers)
-        self.layers_outs = []
+        self.multiscale_layers = nn.ModuleList(multiscale_layers)
+        
+        if multiscale:
+            self.out_layer = nn.Sequential(
+                nn.Conv2d(
+                    in_channels=OUT_CHANNELS * len(multiscale_layers),
+                    out_channels=1,
+                    kernel_size=3,
+                    stride=1,
+                    padding=1,
+                ),
+                nn.Sigmoid()
+            )
     
     def forward(self, x, enc_outs):
         # x: (b, out_channels, h/2^n_stages, w/2^n_stages) -> (b, in_channels, h, w)
-        self.layers_outs.clear()
+        layers_outs = [x]
         for layer in self.layers:
             x = x + enc_outs.pop(-1)
             x = layer(x)
-            self.layers_outs.append(x)
+            if len(self.multiscale_layers) > 0:
+                layers_outs.append(x)
+        
+        outs = []        
+        if len(self.multiscale_layers) > 0:
+            for ith, layer in enumerate(self.multiscale_layers):
+                outs.append(layer(layers_outs[ith]))
+            x = torch.cat(tuple(outs), dim=1)
+            x = self.out_layer(x)
+        
+        del layers_outs
+        
         return x
 
 
@@ -114,6 +153,26 @@ class DecoderLayer(nn.Module):
         # x: (b, c, h, w) -> (b, 2c, h/2, w/2)
         x = self.resblocks(x)
         return self.upsampling(x)
+
+
+class UpsampleLayer(nn.Module):
+    
+    def __init__(self, scale_factor, in_channels, out_channels, kernel_size=1, stride=1, padding=0):
+        super(UpsampleLayer, self).__init__()
+        
+        self.layer = nn.Sequential(
+            nn.Upsample(scale_factor=scale_factor),
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+            ),
+        )
+
+    def forward(self, x):
+        return nn.functional.relu(self.layer(x))
 
 
 class ResBlock(nn.Module):
