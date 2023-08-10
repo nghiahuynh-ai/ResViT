@@ -157,18 +157,27 @@ class DecoderLayer(nn.Module):
 
 class UpsampleLayer(nn.Module):
     
-    def __init__(self, scale_factor, in_channels, out_channels, kernel_size=1, stride=1, padding=0):
+    def __init__(self, scale_factor, in_channels, out_channels):
         super(UpsampleLayer, self).__init__()
         
         self.layer = nn.Sequential(
-            nn.Upsample(scale_factor=scale_factor),
             nn.Conv2d(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding,
+                kernel_size=1,
+                stride=1,
+                padding=0,
             ),
+            nn.ReLU(),
+            nn.Upsample(scale_factor=scale_factor),
+            nn.Conv2d(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.ReLU(),
         )
 
     def forward(self, x):
