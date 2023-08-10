@@ -1,4 +1,6 @@
+import torch
 import torch.nn as nn
+from torchvision.ops import deform_conv2d
 
 
 def build_enc_dec(enc_dec_cfg, out_layer=False):
@@ -61,11 +63,9 @@ class Decoder(nn.Module):
     
     def forward(self, x, enc_outs):
         # x: (b, out_channels, h/2^n_stages, w/2^n_stages) -> (b, in_channels, h, w)
-        # self.layers_outs.clear()
         for layer in self.layers:
             x = x + enc_outs.pop(-1)
             x = layer(x)
-            # self.layers_outs.append(x)
         return x
 
 
@@ -130,7 +130,7 @@ class ResBlock(nn.Module):
             ),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
-            nn.Conv2d(
+            DeformConv2d(
                 in_channels=out_channels,
                 out_channels=out_channels, 
                 kernel_size=kernel_size,
@@ -138,8 +138,73 @@ class ResBlock(nn.Module):
                 padding=1
             ),
             nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
         )
         
     def forward(self, x):
         # x: (b, c, h, w) -> (b, c, h, w)
         return nn.functional.relu(x + self.block(x))
+    
+    
+class DeformConv2d(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, dilation=1, bias=True):
+        super(DeformConv2d, self).__init__()
+
+        assert type(kernel_size) == tuple or type(kernel_size) == int
+
+        kernel_size = kernel_size if type(kernel_size) == tuple else (kernel_size, kernel_size)
+        self.stride = stride if type(stride) == tuple else (stride, stride)
+        self.padding = padding
+        self.dilation = dilation
+
+        self.offset = nn.Conv2d(
+            in_channels,
+            2 * kernel_size[0] * kernel_size[1],
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            bias=True
+        )
+
+        # nn.init.constant_(self.offset_conv.weight, 0.)
+        # nn.init.constant_(self.offset_conv.bias, 0.)
+
+        self.modulator = nn.Conv2d(
+            in_channels,
+            1 * kernel_size[0] * kernel_size[1],
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            bias=True
+        )
+
+        # nn.init.constant_(self.modulator_conv.weight, 0.)
+        # nn.init.constant_(self.modulator_conv.bias, 0.)
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            bias=bias
+        )
+
+    def forward(self, x):
+
+        offset = self.offset(x)
+        modulator = 2. * torch.sigmoid(self.modulator(x))
+        x = deform_conv2d(
+            input=x,
+            offset=offset,
+            weight=self.conv.weight,
+            bias=self.conv.bias,
+            padding=self.padding,
+            mask=modulator,
+            stride=self.stride,
+            dilation=self.dilation
+        )
+        return x
