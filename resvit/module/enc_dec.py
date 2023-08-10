@@ -5,12 +5,12 @@ import torch.nn as nn
 def build_enc_dec(enc_dec_cfg):
     n_stages = int(enc_dec_cfg.n_stages)
     n_resblocks = int(enc_dec_cfg.n_resblocks)
-    in_channels = int(enc_dec_cfg.in_channels)
-    out_channels = int(enc_dec_cfg.out_channels)
+    init_channels = int(enc_dec_cfg.init_channels)
+    max_channels = int(enc_dec_cfg.max_channels)
     multiscale = enc_dec_cfg.multiscale
     
-    encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels)
-    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels, multiscale)
+    encoder = Encoder(n_stages, n_resblocks, init_channels, max_channels)
+    decoder = Decoder(n_stages, n_resblocks, max_channels, init_channels, multiscale)
     
     return encoder, decoder
 
@@ -40,7 +40,7 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
     
-    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3, multiscale=True):
+    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=1, multiscale=True):
         super(Decoder, self).__init__()
         OUT_CHANNELS = out_channels
         layers = []
@@ -56,7 +56,7 @@ class Decoder(nn.Module):
             )
         
         for ith in range(n_stages):
-            # out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
+            
             out_channels = in_channels // 2
             layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels) 
             layers.append(layer)
@@ -89,6 +89,7 @@ class Decoder(nn.Module):
     
     def forward(self, x, enc_outs):
         # x: (b, out_channels, h/2^n_stages, w/2^n_stages) -> (b, in_channels, h, w)
+        
         layers_outs = [x]
         for layer in self.layers:
             x = x + enc_outs.pop(-1)
@@ -103,7 +104,7 @@ class Decoder(nn.Module):
             x = torch.cat(tuple(outs), dim=1)
             x = self.out_layer(x)
         
-        del layers_outs
+        del layers_outs, outs
         
         return x
 
