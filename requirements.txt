@@ -3,7 +3,6 @@ Pillow
 einops
 pytorch-lightning==2.0.1
 torcheval
-lightning
 opencv-python
 pyclipper
 shapely
