@@ -69,6 +69,9 @@ class ResViTDetector(pl.LightningModule):
         x = self.out(x)
         return x
     
+    def _binarize(self, x):
+        return x
+    
     def training_step(self, batch, batch_idx):
         x, gt = batch
         
