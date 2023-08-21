@@ -21,6 +21,7 @@ train_dataset:
   manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
+  resize_dim: 1024 # The smaller dim will be resized to the given size, and the larger will be resized with a similar fraction.
   augment: true
   batch_size: 4
   shuffle: true
@@ -30,6 +31,7 @@ validation_dataset:
   manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
+  resize_dim: 1024 # [max height, max width]
   augment: false
   batch_size: 4
   shuffle: true
@@ -39,6 +41,7 @@ test_dataset:
   manifest_path: null
   scaling_factor: ${enc_dec.n_stages}
   patch_size: ${bottleneck.patch_size}
+  resize_dim: 1024 # [max height, max width]
   augment: false
   batch_size: 4
   shuffle: true
