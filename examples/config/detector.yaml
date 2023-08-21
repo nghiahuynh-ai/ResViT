@@ -1,21 +1,11 @@
 pretrain: null # pretrained state dict path
 
 enc_dec:
-  n_stages: 6
+  n_stages: 4
   n_resblocks: 1
   init_channels: 3
   max_channels: 512
-  deform_stages: [2, 3, 4, 5]
-
-bottleneck:
-  feat_in: 512
-  feat_out: 512
-  patch_size: 3
-  n_layers: 12
-  d_model: 512
-  n_heads: 8
-  ff_expansion_factor: 4
-  dropout: 0.1
+  deform_stages: []
 
 train_dataset:
   manifest_path: null
@@ -51,5 +41,3 @@ optim:
   lr: 0.005
   betas: [0.9, 0.98]
   weight_decay: 1e-4
-  warmup_steps: 500
-  factor: 2.0

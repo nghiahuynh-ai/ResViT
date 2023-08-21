@@ -21,7 +21,6 @@ class ResViTDetector(pl.LightningModule):
         self.cfg = cfg
         
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
-        # self.bottleneck = build_bottleneck(cfg.bottleneck)
 
         if os.path.isfile(cfg.pretrain):
             pretrain = torch.load(cfg.pretrain, map_location=self.device)['state_dict']
@@ -54,13 +53,6 @@ class ResViTDetector(pl.LightningModule):
             betas=cfg.optim.betas,
             weight_decay=cfg.optim.weight_decay,
         )
-        
-        # self.scheduler = NoamScheduler(
-        #     optimizer=self.optimizer,
-        #     factor=cfg.optim.factor,
-        #     model_size=cfg.bottleneck.d_model,
-        #     warmup_steps=cfg.optim.warmup_steps,
-        # )
         
     def forward(self, x):
         x = self.encoder(x)
@@ -182,12 +174,4 @@ class ResViTDetector(pl.LightningModule):
             )
         
     def configure_optimizers(self):
-        return {
-            "optimizer": self.optimizer,
-            # "lr_scheduler": {
-            #     "scheduler": self.scheduler,
-            #     "interval": "step",
-            #     "frequency": 1,
-            #     "monitor": "val_loss",
-            # },
-        }
+        return {"optimizer": self.optimizer}
