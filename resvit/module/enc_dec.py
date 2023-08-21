@@ -14,7 +14,7 @@ def build_enc_dec(enc_dec_cfg, out_layer=False):
         rdeform_stages.append(n_stages - i - 1)
     
     encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels, deform_stages)
-    decoder = Decoder(n_stages, out_channels, in_channels)
+    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)
     
     if out_layer:
         out = nn.Conv2d(
@@ -54,13 +54,13 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, n_stages, in_channels=512, out_channels=3):
+    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3):
         super(Decoder, self).__init__()
         OUT_CHANNELS = out_channels
         layers = []
         for ith in range(n_stages):
             out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
-            layer = DecoderLayer(in_channels=in_channels, out_channels=out_channels) 
+            layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels) 
             layers.append(layer)
             in_channels = in_channels // 2
         self.layers = nn.ModuleList(layers)
@@ -101,22 +101,24 @@ class EncoderLayer(nn.Module):
 
 class DecoderLayer(nn.Module):
     
-    def __init__(self, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
+    def __init__(self, n_resblocks, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
         super(DecoderLayer, self).__init__()
-        self.upsampling = nn.Sequential(
-            nn.ConvTranspose2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding
-            ),
-            nn.ReLU()
+        resblocks = []
+        for _ in range(n_resblocks):
+            resblocks.append(ResBlock(in_channels, in_channels))
+        self.resblocks = nn.Sequential(*resblocks)
+        self.upsampling = nn.ConvTranspose2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding
         )
-
+        
     def forward(self, x):
         # x: (b, c, h, w) -> (b, 2c, h/2, w/2)
-        return self.upsampling(x)
+        x = self.resblocks(x)
+        return nn.functional.relu(self.upsampling(x))
 
 
 class ResBlock(nn.Module):
