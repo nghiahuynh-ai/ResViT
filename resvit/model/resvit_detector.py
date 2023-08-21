@@ -55,12 +55,12 @@ class ResViTDetector(pl.LightningModule):
             weight_decay=cfg.optim.weight_decay,
         )
         
-        self.scheduler = NoamScheduler(
-            optimizer=self.optimizer,
-            factor=cfg.optim.factor,
-            model_size=cfg.bottleneck.d_model,
-            warmup_steps=cfg.optim.warmup_steps,
-        )
+        # self.scheduler = NoamScheduler(
+        #     optimizer=self.optimizer,
+        #     factor=cfg.optim.factor,
+        #     model_size=cfg.bottleneck.d_model,
+        #     warmup_steps=cfg.optim.warmup_steps,
+        # )
         
     def forward(self, x):
         x = self.encoder(x)
@@ -184,10 +184,10 @@ class ResViTDetector(pl.LightningModule):
     def configure_optimizers(self):
         return {
             "optimizer": self.optimizer,
-            "lr_scheduler": {
-                "scheduler": self.scheduler,
-                "interval": "step",
-                "frequency": 1,
-                "monitor": "val_loss",
-            },
+            # "lr_scheduler": {
+            #     "scheduler": self.scheduler,
+            #     "interval": "step",
+            #     "frequency": 1,
+            #     "monitor": "val_loss",
+            # },
         }
