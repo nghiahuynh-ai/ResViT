@@ -14,7 +14,7 @@ from resvit.utils.find_files import find_files_by_ext
 from resvit.utils.augmentation import ImgAugTransform
 
 
-def preprocess(image=None, image_path=None, scaling_factor=6, patch_size=3):
+def preprocess(image=None, image_path=None, scaling_factor=1):
     
     is_array = image is not None
     is_path = image_path is not None
@@ -33,7 +33,7 @@ def preprocess(image=None, image_path=None, scaling_factor=6, patch_size=3):
     image = transform(image)
     
     _, h, w = image.shape   
-    total_downsample_factor = 2**scaling_factor * patch_size
+    total_downsample_factor = 2**scaling_factor
     max_h = math.ceil(h / total_downsample_factor) * total_downsample_factor
     max_w = math.ceil(w / total_downsample_factor) * total_downsample_factor
     pad = (0, max_w - w, 0, max_h - h)
@@ -44,8 +44,8 @@ def preprocess(image=None, image_path=None, scaling_factor=6, patch_size=3):
 
 class ResViTSSLCollate:
     
-    def __init__(self, scaling_factor, patch_size):
-        self.total_downsample_factor = 2**scaling_factor * patch_size
+    def __init__(self, scaling_factor):
+        self.total_downsample_factor = 2**scaling_factor
         
     def __call__(self, batch):
         
@@ -74,8 +74,8 @@ class ResViTSSLCollate:
     
 class ResViTDetectorCollate:
     
-    def __init__(self, scaling_factor, patch_size, resize_dim=-1, augment=False):
-        self.total_downsample_factor = 2**scaling_factor * patch_size
+    def __init__(self, scaling_factor, resize_dim=-1, augment=False):
+        self.total_downsample_factor = 2**scaling_factor
         self.transform = transforms.ToTensor()
         self.resize_dim = resize_dim
         if augment:
@@ -144,7 +144,7 @@ class ResViTSSLDataset(Dataset):
         self.samples = find_files_by_ext(cfg.root_dir, cfg.extensions, acc=[])
         self.transform = transforms.ToTensor()
             
-        collate = ResViTSSLCollate(cfg.scaling_factor, cfg.patch_size)
+        collate = ResViTSSLCollate(cfg.scaling_factor)
         self.loader = DataLoader(
             self, 
             batch_size=cfg.batch_size, 
@@ -183,8 +183,8 @@ class ResViTDetectorDataset(Dataset):
             self.samples = samples
 
         collate = ResViTDetectorCollate(
-            scaling_factor=cfg.scaling_factor, 
-            patch_size=cfg.patch_size, 
+            scaling_factor=cfg.scaling_factor,
+            resize_dim=cfg.resize_dim,
             augment=cfg.augment,
         )
         

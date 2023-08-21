@@ -137,8 +137,7 @@ class ResViTDetector(pl.LightningModule):
         image, h, w = preprocess(
             image=image,
             image_path=image_path, 
-            scaling_factor=self.cfg.enc_dec.n_stages, 
-            patch_size=self.cfg.bottleneck.patch_size,
+            scaling_factor=self.cfg.enc_dec.n_stages,
         )
         image = image.to(self.device)
         
