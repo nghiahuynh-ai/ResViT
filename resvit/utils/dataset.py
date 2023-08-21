@@ -91,6 +91,7 @@ class ResViTDetectorCollate:
         for sample, polygons in batch:
             image = Image.open(sample)
             image = np.array(image.convert('RGB'))
+            gt = gen_label(image, np.array(polygons))
             
             # resize
             if self.resize_dim > 0:
@@ -101,16 +102,12 @@ class ResViTDetectorCollate:
                 else:
                     dim = ((h // dim_min)*h, self.resize_dim)
                 image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
-            
-            # normalize
-            image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+                gt = cv2.resize(gt, dim, interpolation = cv2.INTER_AREA)
             
             # augment 
             if self.augmentor is not None:
                 image = self.augmentor(image)
-                
-            gt = gen_label(image, np.array(polygons))
-            
+
             samples.append(image)
             groundtruths.append(gt)
             
