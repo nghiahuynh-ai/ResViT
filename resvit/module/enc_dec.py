@@ -54,13 +54,13 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, n_stages, n_resblocks, in_channels=512, out_channels=3):
+    def __init__(self, n_stages, in_channels=512, out_channels=3):
         super(Decoder, self).__init__()
         OUT_CHANNELS = out_channels
         layers = []
         for ith in range(n_stages):
             out_channels = in_channels // 2 if ith < n_stages - 1 else OUT_CHANNELS
-            layer = DecoderLayer(n_resblocks=n_resblocks, in_channels=in_channels, out_channels=out_channels) 
+            layer = DecoderLayer(in_channels=in_channels, out_channels=out_channels) 
             layers.append(layer)
             in_channels = in_channels // 2
         self.layers = nn.ModuleList(layers)
