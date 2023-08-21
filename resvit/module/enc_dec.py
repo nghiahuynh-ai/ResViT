@@ -14,7 +14,7 @@ def build_enc_dec(enc_dec_cfg, out_layer=False):
         rdeform_stages.append(n_stages - i - 1)
     
     encoder = Encoder(n_stages, n_resblocks, in_channels, out_channels, deform_stages)
-    decoder = Decoder(n_stages, n_resblocks, out_channels, in_channels)
+    decoder = Decoder(n_stages, out_channels, in_channels)
     
     if out_layer:
         out = nn.Conv2d(
