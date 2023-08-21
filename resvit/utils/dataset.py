@@ -92,17 +92,23 @@ class ResViTDetectorCollate:
             image = Image.open(sample)
             image = np.array(image.convert('RGB'))
             
-            h, w, _ = image.shape
-            dim_min = min(h, w)
-            if h < w:
-                dim = (self.resize_dim, (w // dim_min)*w)
-            else:
-                dim = ((h // dim_min)*h, self.resize_dim)
-            image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+            # resize
+            if self.resize_dim > 0:
+                h, w, _ = image.shape
+                dim_min = min(h, w)
+                if h < w:
+                    dim = (self.resize_dim, (w // dim_min)*w)
+                else:
+                    dim = ((h // dim_min)*h, self.resize_dim)
+                image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
             
+            # normalize
             image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
+            
+            # augment 
             if self.augmentor is not None:
                 image = self.augmentor(image)
+                
             gt = gen_label(image, np.array(polygons))
             
             samples.append(image)
