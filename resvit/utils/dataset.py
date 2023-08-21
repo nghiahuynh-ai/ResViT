@@ -74,7 +74,7 @@ class ResViTSSLCollate:
     
 class ResViTDetectorCollate:
     
-    def __init__(self, scaling_factor, patch_size, resize_dim, augment=False):
+    def __init__(self, scaling_factor, patch_size, resize_dim=-1, augment=False):
         self.total_downsample_factor = 2**scaling_factor * patch_size
         self.transform = transforms.ToTensor()
         self.resize_dim = resize_dim
