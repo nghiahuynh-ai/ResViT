@@ -1,4 +1,4 @@
-pretrain: null # pretrained state dict path
+pretrain: '' # pretrained state dict path
 
 enc_dec:
   n_stages: 4
