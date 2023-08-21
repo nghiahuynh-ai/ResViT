@@ -103,17 +103,20 @@ class DecoderLayer(nn.Module):
     
     def __init__(self, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
         super(DecoderLayer, self).__init__()
-        self.upsampling = nn.ConvTranspose2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding
+        self.upsampling = nn.Sequential(
+            nn.ConvTranspose2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding
+            ),
+            nn.ReLU()
         )
-        
+
     def forward(self, x):
         # x: (b, c, h, w) -> (b, 2c, h/2, w/2)
-        return nn.functional.relu(self.upsampling(x))
+        return self.upsampling(x)
 
 
 class ResBlock(nn.Module):
