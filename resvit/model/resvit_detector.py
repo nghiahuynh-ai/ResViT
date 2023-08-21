@@ -21,7 +21,7 @@ class ResViTDetector(pl.LightningModule):
         self.cfg = cfg
         
         self.encoder, self.decoder = build_enc_dec(cfg.enc_dec, out_layer=False)
-        self.bottleneck = build_bottleneck(cfg.bottleneck)
+        # self.bottleneck = build_bottleneck(cfg.bottleneck)
 
         if os.path.isfile(cfg.pretrain):
             pretrain = torch.load(cfg.pretrain, map_location=self.device)['state_dict']
@@ -64,7 +64,7 @@ class ResViTDetector(pl.LightningModule):
         
     def forward(self, x):
         x = self.encoder(x)
-        x = self.bottleneck(x)
+        # x = self.bottleneck(x)
         x = self.decoder(x, self.encoder.layers_outs)
         x = self.out(x)
         return x
