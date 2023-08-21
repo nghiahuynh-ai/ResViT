@@ -74,10 +74,13 @@ class ResViTSSLCollate:
     
 class ResViTDetectorCollate:
     
-    def __init__(self, scaling_factor, patch_size):
+    def __init__(self, scaling_factor, patch_size, augment=False):
         self.total_downsample_factor = 2**scaling_factor * patch_size
         self.transform = transforms.ToTensor()
-        self.augmentor = ImgAugTransform()
+        if augment:
+            self.augmentor = ImgAugTransform()
+        else:
+            self.augmentor = None
         
     def __call__(self, batch):
         
@@ -88,7 +91,8 @@ class ResViTDetectorCollate:
             image = Image.open(sample)
             image = np.array(image.convert('RGB'))
             image = cv2.normalize(image, None, alpha=0,beta=255, norm_type=cv2.NORM_MINMAX)
-            image = self.augmentor(image)
+            if self.augmentor is not None:
+                image = self.augmentor(image)
             gt = gen_label(image, np.array(polygons))
             
             samples.append(image)
@@ -165,7 +169,7 @@ class ResViTDetectorDataset(Dataset):
                         samples.append((line['path'], line['box']))
             self.samples = samples
 
-        collate = ResViTDetectorCollate(cfg.scaling_factor, cfg.patch_size)
+        collate = ResViTDetectorCollate(cfg.scaling_factor, cfg.patch_size, cfg.augment)
         self.loader = DataLoader(
             self, 
             batch_size=cfg.batch_size, 
