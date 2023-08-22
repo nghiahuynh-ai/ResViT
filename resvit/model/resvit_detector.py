@@ -27,18 +27,7 @@ class ResViTDetector(pl.LightningModule):
             pretrain = torch.load(cfg.pretrain, map_location=self.device)['state_dict']
             self.load_state_dict(pretrain, strict=False)
         
-        self.prob = nn.Sequential(
-            nn.Conv2d(
-                in_channels=cfg.enc_dec.init_channels,
-                out_channels=1,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-            ),
-            nn.Sigmoid()
-        )
-        
-        self.thres = nn.Sequential(
+        self.out = nn.Sequential(
             nn.Conv2d(
                 in_channels=cfg.enc_dec.init_channels,
                 out_channels=1,
@@ -77,10 +66,8 @@ class ResViTDetector(pl.LightningModule):
         x, enc_layers_out = self.encoder(x)
         x = self.bottleneck(x)
         x = self.decoder(x, enc_layers_out)
-        prob = self.prob(x)
-        thres = self.thres(x)
-        x = self._binarize(prob, thres)
-        return x, prob, thres
+        x = self.out(x)
+        return x
     
     def _binarize(self, prob, thres):
         return 1 / (1 + torch.exp(-50*(prob - thres)))
@@ -88,7 +75,7 @@ class ResViTDetector(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, gt = batch
         
-        x_pred, prob, thres = self.forward(x)
+        x_pred = self.forward(x)
         
         loss = self.loss['ls'](x_pred, gt)
         
@@ -106,7 +93,7 @@ class ResViTDetector(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, gt = batch
 
-        x_pred, prob, thres = self.forward(x)
+        x_pred= self.forward(x)
         loss = self.loss['ls'](x_pred, gt)
         x_pred = ((x_pred > 0.5) * 1.0).to(self.device)
         
