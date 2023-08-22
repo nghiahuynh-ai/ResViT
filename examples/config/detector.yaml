@@ -51,5 +51,5 @@ optim:
   lr: 0.005
   betas: [0.9, 0.98]
   weight_decay: 1e-4
-  warmup_steps: 500
+  warmup_steps: 1000
   factor: 2.0
