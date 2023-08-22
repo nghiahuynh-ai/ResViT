@@ -25,9 +25,7 @@ def gen_label(image, polygons, min_text_size=8, shrink_ratio=0.4):
             if shrinked == []:
                 cv2.fillPoly(gt, polygon.astype(np.int32), 1)
                 continue
-            print(shrinked)
             shrinked = np.array(shrinked[0]).reshape(-1, 2)
-            print(shrinked)
             cv2.fillPoly(gt, [shrinked.astype(np.int32)], 1)
         
     return gt
