@@ -23,7 +23,7 @@ def gen_label(image, polygons, min_text_size=8, shrink_ratio=0.4):
             padding.AddPath(subject, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
             shrinked = padding.Execute(-distance)
             if shrinked == []:
-                cv2.fillPoly(gt, polygon.astype(np.int32), 1)
+                cv2.fillPoly(gt, [polygon.astype(np.int32)], 1)
                 continue
             shrinked = np.array(shrinked[0]).reshape(-1, 2)
             cv2.fillPoly(gt, [shrinked.astype(np.int32)], 1)
